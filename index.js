@@ -136,7 +136,6 @@ class ResponsiveScreen {
         wrapText(this.title, canvas.width / 2, titleY, maxWidth, titleSize * 1.3, "center");
         
         if (this.sub) {
-            // KORREKTUR: Auch der Subtext wird nun über `bold` komplett fett gedruckt
             ctx.font = `bold ${subSize}px Arial`;
             let subY = canvas.height * 0.70;
             let subX = this.alignSub === "left" ? canvas.width / 2 - 80 : canvas.width / 2;
@@ -147,7 +146,7 @@ class ResponsiveScreen {
         if (!this.active || !this.allowedKeys.includes(key)) return;
         this.active = false;
         let rt = (performance.now() - this.startTime) / 1000;
-        this.callback(key, rt); // KORREKTUR: Syntax-Fehler behoben
+        this.callback(key, rt);
     }
 }
 
@@ -174,9 +173,10 @@ function startExperiment() {
             currentRoutine.draw();
         });
     });
-    // 3. Lernen Anleitung
+    // 3. Lernen Anleitung (Wunschgemäß geändert: "Nur Wörter, die gemerkt werden sollen...")
     routines.push(() => {
-        let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.\n\nNach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt.\n\n[LEERTASTE ZUM STARTEN]";
+        let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.`;
+        let subText = "Nach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt.\n\n[LEERTASTE ZUM STARTEN]";
         currentRoutine = new ResponsiveScreen(text, subText, [' '], nextRoutine);
         currentRoutine.draw();
     });
@@ -209,7 +209,7 @@ function startExperiment() {
     });
     // 5. Test Anleitung
     routines.push(() => {
-        let text = "ÜBERRASCHUNGSTEST!\n\nEntscheiden Sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob Sie das Wort merken oder vergessen sollten.";
+        let text = "ÜBERRASCHUNGSTEST!\n\nEntscheiden sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob sie das wort merken oder vergessen sollten.";
         currentRoutine = new ResponsiveScreen(text, "[F] = NEU       [J] = ALT (vorgekommen)\n\n[LEERTASTE ZUM STARTEN]", [' '], nextRoutine);
         currentRoutine.draw();
     });
@@ -231,7 +231,7 @@ function startExperiment() {
     });
     // 6. Post-Fragen Anleitung
     routines.push(() => {
-        currentRoutine = new ResponsiveScreen("Zum Abschluss bitten wir Sie noch um die Beantwortung von fünf kurzen Fragen.", "[LEERTASTE DRÜCKEN]", [' '], nextRoutine);
+        currentRoutine = new ResponsiveScreen("Zum Abschluss bitten wir Sie noch um die Beantwortung von fiete kurzen Fragen.", "[LEERTASTE DRÜCKEN]", [' '], nextRoutine);
         currentRoutine.draw();
     });
     const postQuestions = ["Haben Sie von der fremden Person ein konkretes Bild im Kopf gehabt?", "Haben Sie versucht, sich die zu merkenden Wörter aktiv zu merken?", "Haben Sie versucht, die zu vergessenden Wörter absichtlich zu vergessen?", "Haben Sie während der Lernphase Notizen gemacht (z. B. auf Papier oder am PC)?", "Haben Sie an diesem Experiment ernsthaft und konzentriert teilgenommen?"];
@@ -248,7 +248,7 @@ function startExperiment() {
     routines.push(() => {
         sendDataToOSF();
         currentRoutine = { draw: () => {
-            ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "#000000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
             let baseSize = Math.max(canvas.width, canvas.height);
             ctx.font = `bold ${Math.round(baseSize * 0.011)}px Arial`;
@@ -325,7 +325,7 @@ function sendDataToOSF() {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "*/*" },
         body: JSON.stringify({
-            experimentID: "WimrwOGIeFL8", 
+            experimentID: "DEINE_DATAPIPE_EXPERIMENT_ID_HIER", 
             filename: filename,
             data: csvContent
         })
