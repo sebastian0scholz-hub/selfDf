@@ -122,14 +122,14 @@ function startExperiment() {
     routines.push(() => { currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
     routines.push(() => { currentRoutine = new ResponsiveScreen("Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die angezeigten Buttons zum Antworten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
     
-    const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich habe nicht viel, worauf ich stolz sein könnte.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
+    const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich nachlässig bin ich hin und wieder gewiss nicht.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
     rosenbergItems.forEach(item => {
         routines.push(() => { currentRoutine = new ResponsiveScreen(item, isMobile ? "" : "1 = Trifft gar nicht zu\n2 = Trifft eher nicht zu\n3 = Trifft eher zu\n4 = Trifft voll zu", ['1','2','3','4'], (key, rt) => { compiledData.push({ section: 'rosenberg', item: item, response: key, rt: rt }); nextRoutine(); }, false, "left"); currentRoutine.draw(); });
     });
     
     routines.push(() => {
         let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.\n\nNach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt.`;
-        currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); currentRoutine.draw();
+        currentRoutine = new ResponsiveScreen(text, null, [' '], nextRoutine); currentRoutine.draw();
     });
     
     learningItems.forEach(item => {
@@ -138,7 +138,8 @@ function startExperiment() {
             currentRoutine = { draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#000000"; ctx.font = "bold " + fixSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); }, handleKey: () => {} }; currentRoutine.draw();
             setTimeout(() => {
                 let pcPrompt = "\n\n[F] = NEIN    [J] = JA";
-                currentRoutine = new ResponsiveScreen(item.word.toUpperCase(), isMobile ? "" : item.prompt + pcPrompt, ['f', 'j'], (key, rt) => {
+                // KORREKTUR: item.prompt (die Frage zur Person) wird nun sauber als Haupttitel übergeben, das Adjektiv steht darunter im Subtext
+                currentRoutine = new ResponsiveScreen(item.prompt, isMobile ? item.word.toUpperCase() : item.word.toUpperCase() + pcPrompt, ['f', 'j'], (key, rt) => {
                     compiledData.push({ section: 'learning', word: item.word, ref: item.ref, cue: item.cue, response: key === 'f'?'Nein':'Ja', rt: rt });
                     currentRoutine = { draw: () => {
                         ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = item.cue === "MERKEN" ? "#006400" : "#8B0000"; 
@@ -174,7 +175,7 @@ function startExperiment() {
         });
     });
     
-    routines.push(() => { currentRoutine = new ResponsiveScreen("Zum Abschluss bitten wir Sie noch um die Beantwortung von fiete kurzen Fragen.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
+    routines.push(() => { currentRoutine = new ResponsiveScreen("Zum Abschluss bitten wir Sie noch um die Beantwortung von fünf kurzen Fragen.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
     const postQuestions = ["Haben Sie von der fremden Person ein konkretes Bild im Kopf gehabt?", "Haben Sie versucht, sich die zu merkenden Wörter aktiv zu merken?", "Haben Sie versucht, die zu vergessenden Wörter absichtlich zu vergessen?", "Haben Sie während der Lernphase Notizen gemacht (z. B. auf Papier oder am PC)?", "Haben Sie an diesem Experiment ernsthaft und konzentriert teilgenommen?"];
     postQuestions.forEach(q => {
         routines.push(() => { currentRoutine = new ResponsiveScreen(q, isMobile ? "" : "[F] = NEIN       [J] = JA", ['f', 'j'], (key, rt) => { compiledData.push({ section: 'post_question', question: q, response: key==='f'?'Nein':'Ja', rt: rt }); nextRoutine(); }, false, "center", "binary-post"); currentRoutine.draw(); });
