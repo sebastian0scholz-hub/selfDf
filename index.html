@@ -1,99 +1,65 @@
 <!doctype html>
 <html>
   <head>
-    <title>DataPipe All-in-One Test</title>
+    <title>SRE & Directed Forgetting Experiment</title>
     <meta charset="utf-8">
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
     <style>
-      body { 
-        background-color: #7F7F7F; 
-        margin: 0; 
-        font-family: Arial, sans-serif; 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        width: 100vw; 
-        height: 100vh; 
-        color: #000000;
-      }
-      #test-box {
-        text-align: center;
-        background-color: #f0f0f0;
-        padding: 40px;
-        border-radius: 8px;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
-        max-width: 500px;
-      }
-      #status {
-        margin-top: 20px;
-        font-weight: bold;
-        font-size: 20px;
-      }
+      body { background-color: #7F7F7F; margin: 0; overflow: hidden; font-family: Arial, sans-serif; width: 100vw; height: 100vh; }
+      #form-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #7F7F7F; z-index: 9999; }
+      #form-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #f0f0f0; padding: 30px; border-radius: 8px; box-shadow: 0px 4px 10px rgba(0,0,0,0.3); width: 350px; color: #000000; box-sizing: border-box; }
+      .form-field { margin-bottom: 15px; }
+      .form-field label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+      .form-field input, .form-field select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+      #start-btn { width: 100%; padding: 10px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; }
+      #start-btn:hover { background-color: #555; }
+      #error-msg { color: red; font-size: 13px; font-weight: bold; margin-bottom: 10px; display: none; }
+      #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; }
+      #experiment-canvas { background-color: #7F7F7F; display: block; }
+      
+      /* Gemeinsamer Style für Touch-Buttons auf Handys */
+      .mobile-btn { padding: 15px; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; }
     </style>
   </head>
   <body>
     
-    <div id="test-box">
-      <h2 style="margin-top:0;">DataPipe All-in-One Test</h2>
-      <p id="instruction">Bitte drücken Sie die <b>[LEERTASTE]</b>, um den Sendevorgang zu starten.</p>
-      <div id="status">Warte auf Tastendruck...</div>
+    <div id="form-overlay">
+      <div id="form-container">
+        <h3 style="margin-top: 0; text-align: center;">Gedächtnisstudie</h3>
+        <div id="error-msg">Bitte füllen Sie alle Felder aus!</div>
+        <div class="form-field"><label>Alter:</label><input type="number" id="input-alter" min="1" max="100"></div>
+        <div class="form-field">
+          <label>Geschlecht:</label>
+          <select id="select-geschlecht">
+            <option value="Auswahl">-- Bitte wählen --</option>
+            <option value="männlich">männlich</option>
+            <option value="weiblich">weiblich</option>
+            <option value="divers">divers</option>
+          </select>
+        </div>
+        <div class="form-field"><label>Beruf:</label><input type="text" id="input-beruf"></div>
+        <button id="start-btn">Experiment starten</button>
+      </div>
     </div>
 
-    <script>
-      // Der Programmcode liegt nun direkt und sicher in der HTML-Datei
-      const statusDiv = document.getElementById('status');
-      const instructionP = document.getElementById('instruction');
-      
-      // HIER DEINE ECHTE DATAPIPE-ID EINTRAGEN
-      let myToken = 'WimrwOGIeFL8'; 
+    <div id="canvas-container">
+      <canvas id="experiment-canvas"></canvas>
+    </div>
 
-      console.log("Inline-Testskript aktiv. Warte auf Leertaste...");
+    <!-- 1. Touch-Buttons für Ja/Nein & Alt/Neu Entscheidungen auf dem Handy -->
+    <div id="mobile-buttons" style="position: fixed; bottom: 8%; left: 0; width: 100vw; display: none; justify-content: space-around; z-index: 99999; padding: 0 20px; box-sizing: border-box;">
+      <button id="btn-left" class="mobile-btn" style="width: 44%; background-color: #8B0000;">NEIN / NEU</button>
+      <button id="btn-right" class="mobile-btn" style="width: 44%; background-color: #006400;">JA / ALT</button>
+    </div>
 
-      window.addEventListener('keydown', function(e) {
-          if (e.key === ' ' || e.code === 'Space') {
-              // Optisches Feedback erzwingen, damit wir sehen, dass die Taste erkannt wurde
-              instructionP.innerHTML = "Sendevorgang läuft...";
-              statusDiv.innerHTML = "Verbindung zu OSF wird aufgebaut...";
-              statusDiv.style.color = "blue";
-              
-              sendTestFields();
-          }
-      });
+    <!-- 2. NEU: Touch-Buttons für die Rosenberg-Skala auf dem Handy untereinander -->
+    <div id="mobile-rosenberg-buttons" style="position: fixed; bottom: 5%; left: 50%; transform: translateX(-50%); width: 85vw; display: none; flex-direction: column; gap: 10px; z-index: 99999; box-sizing: border-box;">
+      <button id="r-btn-1" class="mobile-btn" style="background-color: #444; width: 100%;">1 = Trifft gar nicht zu</button>
+      <button id="r-btn-2" class="mobile-btn" style="background-color: #555; width: 100%;">2 = Trifft eher nicht zu</button>
+      <button id="r-btn-3" class="mobile-btn" style="background-color: #666; width: 100%;">3 = Trifft eher zu</button>
+      <button id="r-btn-4" class="mobile-btn" style="background-color: #777; width: 100%;">4 = Trifft voll zu</button>
+    </div>
 
-      function sendTestFields() {
-          const csvContent = "participant,status,test_time\n" + 
-                           `"test_user_mac","VERBINDUNG_ERFOLGREICH","${new Date().toISOString()}"\n`;
-          
-          const payload = {
-              token: myToken.trim(), 
-              filename: "connection_test_mac.csv",
-              data: csvContent
-          };
-
-          fetch("https://pipe.jspsych.org/api/data/", {
-              method: "POST",
-              headers: { 
-                  "Content-Type": "application/json",
-                  "Accept": "application/json" 
-              },
-              body: JSON.stringify(payload)
-          })
-          .then(res => {
-              if (res.ok) {
-                  statusDiv.innerHTML = "🎉 ERFOLG!<br>Daten wurden an DataPipe/OSF übertragen.";
-                  statusDiv.style.color = "green";
-                  instructionP.innerHTML = "Prüfen Sie jetzt Ihr DataPipe-Dashboard (Zähler sollte bei 1 stehen).";
-              } else {
-                  statusDiv.innerHTML = `❌ SERVER-FEHLER!<br>Statuscode: ${res.status}<br>(Überprüfe ID und OSF-Link)`;
-                  statusDiv.style.color = "red";
-                  instructionP.innerHTML = "Fehler 400 bedeutet: DataPipe kennt diese ID nicht oder OSF ist nicht verknüpft.";
-              }
-          })
-          .catch(err => {
-              statusDiv.innerHTML = `❌ NETZWERK-FEHLER!<br>${err.message}`;
-              statusDiv.style.color = "red";
-          });
-      }
-    </script>
+    <script src="./index.js"></script>
   </body>
 </html>
