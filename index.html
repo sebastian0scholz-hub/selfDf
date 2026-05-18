@@ -20,7 +20,6 @@
   </head>
   <body>
     
-    <!-- Demografie-Eingabe (Standard HTML5) -->
     <div id="form-overlay">
       <div id="form-container">
         <h3 style="margin-top: 0; text-align: center;">Gedächtnisstudie</h3>
@@ -40,17 +39,11 @@
       </div>
     </div>
 
-    <!-- Zeichenfläche für das Experiment -->
     <div id="canvas-container">
       <canvas id="experiment-canvas"></canvas>
     </div>
 
-    <!-- Großflächige Touch-Buttons für Smartphones und Tablets -->
-    <div id="mobile-buttons" style="position: fixed; bottom: 8%; left: 0; width: 100vw; display: none; justify-content: space-around; z-index: 99999; padding: 0 20px; box-sizing: border-box;">
-      <button id="btn-left" style="width: 44%; padding: 22px; background-color: #8B0000; color: white; border: none; border-radius: 12px; font-size: 26px; font-weight: bold; -webkit-tap-highlight-color: transparent;">[F] NEIN / NEU</button>
-      <button id="btn-right" style="width: 44%; padding: 22px; background-color: #006400; color: white; border: none; border-radius: 12px; font-size: 26px; font-weight: bold; -webkit-tap-highlight-color: transparent;">[J] JA / ALT</button>
-    </div>
-
+    <!-- KORREKTUR: type="module" entfernt für reibungslosen lokalen Start -->
     <script src="./index.js"></script>
   </body>
 </html>
