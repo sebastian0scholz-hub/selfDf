@@ -325,7 +325,7 @@ function sendDataToOSF() {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "*/*" },
         body: JSON.stringify({
-            experimentID: "DEINE_DATAPIPE_EXPERIMENT_ID_HIER", 
+            experimentID: "WimrwOGIeFL8", 
             filename: filename,
             data: csvContent
         })
