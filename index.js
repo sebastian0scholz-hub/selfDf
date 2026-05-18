@@ -225,10 +225,25 @@ function convertToCSV() {
     return csv;
 }
 
-function sendDataToOSF() {
-    const filename = `subject_${expInfo.participant}.csv`; const csvContent = convertToCSV();
-    fetch("https://jspsych.org", {
-        method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({ token: "WimrwOGIeFL8", filename: filename, data: csvContent })
-    }).then(res => console.log("Abgabe an OSF erfolgt. Status: ", res.status));
+function sendDataToGoogleSheets() {
+  const csvContent = convertToCSV();
+  
+  // Die URL, die Sie aus Schritt 2 kopiert haben
+  const googleWebAppUrl = "https://script.google.com/macros/s/AKfycbx-lHOGmewFG5Vnkhfv079ChQWXR5dFt4MGc-2fZhHHg8wJ7ILg8QkQOokw1s4R_-o5Pw/exec"; 
+
+  fetch(googleWebAppUrl, {
+      method: "POST",
+      mode: "no-cors", // Verhindert CORS-Blockaden im Browser
+      headers: {
+          "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ 
+          data: csvContent 
+      })
+  })
+  .then(() => {
+      console.log("Daten erfolgreich an Google Sheets übertragen.");
+  })
+  .catch(err => console.error("Fehler bei der Übertragung:", err));
 }
+
