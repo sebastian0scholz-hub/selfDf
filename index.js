@@ -176,8 +176,7 @@ function startExperiment() {
     });
     // 3. Lernen Anleitung
     routines.push(() => {
-        let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.`;
-        let subText = "Nach der Einschätzung folgt die Anweisung das Wort zu erinnern oder zu vergessen. Wörter, die erinnert werden sollen, werden später in einem Test abgefragt.\n\n[LEERTASTE ZUM STARTEN]";
+        let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.\n\nNach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt.\n\n[LEERTASTE ZUM STARTEN]";
         currentRoutine = new ResponsiveScreen(text, subText, [' '], nextRoutine);
         currentRoutine.draw();
     });
@@ -210,7 +209,7 @@ function startExperiment() {
     });
     // 5. Test Anleitung
     routines.push(() => {
-        let text = "ÜBERRASCHUNGSTEST!\n\nEntscheiden sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob sie das wort merken oder vergessen sollten.";
+        let text = "ÜBERRASCHUNGSTEST!\n\nEntscheiden Sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob Sie das Wort merken oder vergessen sollten.";
         currentRoutine = new ResponsiveScreen(text, "[F] = NEU       [J] = ALT (vorgekommen)\n\n[LEERTASTE ZUM STARTEN]", [' '], nextRoutine);
         currentRoutine.draw();
     });
