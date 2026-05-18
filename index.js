@@ -130,14 +130,14 @@ class ResponsiveScreen {
         const binButtons = document.getElementById('mobile-binary-buttons');
         const numButtons = document.getElementById('mobile-number-buttons');
         
-        // 1. Wenn wir auf dem Handy sind und Ja/Nein oder Alt/Neu ansteht ('f' und 'j')
+        // 1. Ja/Nein oder Alt/Neu Auswahl auf dem Smartphone
         if (isMobile && this.allowedKeys.includes('f') && this.allowedKeys.includes('j')) {
             binButtons.style.display = 'flex';
             numButtons.style.display = 'none';
             document.getElementById('btn-left').onclick = () => this.handleKey('f');
             document.getElementById('btn-right').onclick = () => this.handleKey('j');
         } 
-        // 2. Wenn Rosenberg läuft (Tasten '1', '2', '3', '4')
+        // 2. Rosenberg-Skala Buttons (1-4) auf dem Smartphone
         else if (isMobile && this.allowedKeys.includes('1')) {
             binButtons.style.display = 'none';
             numButtons.style.display = 'flex';
@@ -146,12 +146,11 @@ class ResponsiveScreen {
             document.getElementById('btn-3').onclick = () => this.handleKey('3');
             document.getElementById('btn-4').onclick = () => this.handleKey('4');
         } 
-        // 3. Für normale Text-Instruktionen (Leertaste)
+        // 3. Für reine Textseiten (Weitergehen per Bildschirm-Tippen)
         else {
             binButtons.style.display = 'none';
             numButtons.style.display = 'none';
             if (isMobile && this.allowedKeys.includes(' ')) {
-                // Auf Handys reicht ein Klick auf den Bildschirm zum Weitergehen
                 canvas.onclick = () => this.handleKey(' ');
             }
         }
@@ -171,7 +170,7 @@ class ResponsiveScreen {
         wrapText(this.title, canvas.width / 2, titleY, maxWidth, titleSize * 1.3, "center");
         
         if (this.sub) {
-            let subY = canvas.height * 0.65;
+            let subY = canvas.height * 0.70;
             let subX = this.alignSub === "left" && !isMobile ? canvas.width / 2 - 80 : canvas.width / 2;
             let currentAlign = isMobile ? "center" : this.alignSub;
             wrapText(this.sub, subX, subY, maxWidth, titleSize * 1.3, currentAlign);
@@ -359,16 +358,18 @@ function sendDataToOSF() {
     const filename = `subject_${expInfo.participant}.csv`;
     const csvContent = convertToCSV();
 
-    fetch("https://pipe.jspsych.org/api/data/", {
+    fetch("https://jspsych.org", {
         method: "POST",
         headers: { 
             "Content-Type": "application/json",
             "Accept": "application/json" 
         },
         body: JSON.stringify({
-            token: "WimrwOGIeFL8", // <--- DEINE ID HIER EINTRAGEN
-            filename: filename,
-            data: csvContent
+            experimentID: "WimrwOGIeFL8",
+	    filename: filename,
+            data: csvContent,
         })
-    }).then(res => console.log("Abgabe an OSF erfolgt. Status: ", res.status));
+    })
+    .then(res => console.log("Abgabe an OSF erfolgt. Status: ", res.status))
+    .catch(err => console.error("Fehler bei der Datenübertragung:", err));
 }

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
     <style>
-      body { background-color: #7F7F7F; margin: 0; overflow: hidden; font-family: Arial, sans-serif; width: 100vw; height: 100vh; }
+      body { background-color: #7F7F7F; margin: 0; overflow: hidden; font-family: Arial, sans-serif; width: 100vw; height: 100vh; -webkit-user-select: none; user-select: none; }
       #form-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #7F7F7F; z-index: 9999; }
       #form-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #f0f0f0; padding: 30px; border-radius: 8px; box-shadow: 0px 4px 10px rgba(0,0,0,0.3); width: 350px; color: #000000; box-sizing: border-box; }
       .form-field { margin-bottom: 15px; }
@@ -17,12 +17,17 @@
       #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; }
       #experiment-canvas { background-color: #7F7F7F; display: block; }
       
-      /* Gemeinsamer Style für Touch-Buttons auf Handys */
-      .mobile-btn { padding: 15px; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; }
+      /* Styling für die großen mobilen Touch-Buttons */
+      .mobile-btn-container { position: fixed; bottom: 8%; left: 0; width: 100vw; display: none; justify-content: space-around; z-index: 99999; padding: 0 20px; box-sizing: border-box; }
+      .mobile-touch-btn { padding: 20px; color: white; border: none; border-radius: 8px; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0px 4px 6px rgba(0,0,0,0.2); -webkit-tap-highlight-color: transparent; }
+      .btn-red { background-color: #8B0000; width: 45%; }
+      .btn-green { background-color: #006400; width: 45%; }
+      .btn-num { background-color: #333; width: 22%; padding: 25px 10px; font-size: 26px; }
     </style>
   </head>
   <body>
     
+    <!-- Demografie-Eingabe -->
     <div id="form-overlay">
       <div id="form-container">
         <h3 style="margin-top: 0; text-align: center;">Gedächtnisstudie</h3>
@@ -42,22 +47,23 @@
       </div>
     </div>
 
+    <!-- Zeichen-Bildschirm -->
     <div id="canvas-container">
       <canvas id="experiment-canvas"></canvas>
     </div>
 
-    <!-- 1. Touch-Buttons für Ja/Nein & Alt/Neu Entscheidungen auf dem Handy -->
-    <div id="mobile-buttons" style="position: fixed; bottom: 8%; left: 0; width: 100vw; display: none; justify-content: space-around; z-index: 99999; padding: 0 20px; box-sizing: border-box;">
-      <button id="btn-left" class="mobile-btn" style="width: 44%; background-color: #8B0000;">NEIN / NEU</button>
-      <button id="btn-right" class="mobile-btn" style="width: 44%; background-color: #006400;">JA / ALT</button>
+    <!-- MOBIL-BUTTONS 1: Für Ja/Nein & Alt/Neu Entscheidungen -->
+    <div id="mobile-binary-buttons" class="mobile-btn-container">
+      <button id="btn-left" class="mobile-touch-btn btn-red">[F] NEIN / NEU</button>
+      <button id="btn-right" class="mobile-touch-btn btn-green">[J] JA / ALT</button>
     </div>
 
-    <!-- 2. NEU: Touch-Buttons für die Rosenberg-Skala auf dem Handy untereinander -->
-    <div id="mobile-rosenberg-buttons" style="position: fixed; bottom: 5%; left: 50%; transform: translateX(-50%); width: 85vw; display: none; flex-direction: column; gap: 10px; z-index: 99999; box-sizing: border-box;">
-      <button id="r-btn-1" class="mobile-btn" style="background-color: #444; width: 100%;">1 = Trifft gar nicht zu</button>
-      <button id="r-btn-2" class="mobile-btn" style="background-color: #555; width: 100%;">2 = Trifft eher nicht zu</button>
-      <button id="r-btn-3" class="mobile-btn" style="background-color: #666; width: 100%;">3 = Trifft eher zu</button>
-      <button id="r-btn-4" class="mobile-btn" style="background-color: #777; width: 100%;">4 = Trifft voll zu</button>
+    <!-- MOBIL-BUTTONS 2: Für Rosenberg Skala (1, 2, 3, 4 untereinander/nebeneinander) -->
+    <div id="mobile-number-buttons" class="mobile-btn-container">
+      <button id="btn-1" class="mobile-touch-btn btn-num">1</button>
+      <button id="btn-2" class="mobile-touch-btn btn-num">2</button>
+      <button id="btn-3" class="mobile-touch-btn btn-num">3</button>
+      <button id="btn-4" class="mobile-touch-btn btn-num">4</button>
     </div>
 
     <script src="./index.js"></script>
