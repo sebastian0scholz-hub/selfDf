@@ -197,12 +197,12 @@ function startExperiment() {
         });
     });
     routines.push(() => {
-        let text = "Ablenkungsaufgabe (Dauer: 60 Sekunden):\n\nEs erscheint gleich ein Quadrat in der Bildschirmmitte.\n\nWenn das Quadrat GRÜN wird -> Drücken Sie [LEERTASTE]!\nWenn das Quadrat ROT wird -> Drücken Sie NICHTS!";
+        let text = "Aufgabe 2 (Dauer: 60 Sekunden):\n\nEs erscheint gleich ein Quadrat in der Bildschirmmitte.\n\nWenn das Quadrat GRÜN wird -> Drücken Sie so schnell es geht [LEERTASTE]!\nWenn das Quadrat ROT wird -> Drücken Sie NICHTS!";
         currentRoutine = new ResponsiveScreen(text, "[LEERTASTE DRÜCKEN ZUM STARTEN]", [' '], runDistractorGame);
         currentRoutine.draw();
     });
     routines.push(() => {
-        let text = "ÜBERRASCHUNGSTEST!\n\nEntscheiden sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob sie das wort merken oder vergessen sollten.";
+        let text = "ÜBERRASCHUNGSTEST!\n\nEntscheiden sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob Sie das Wort merken oder vergessen sollten!";
         currentRoutine = new ResponsiveScreen(text, "[F] = NEU       [J] = ALT (vorgekommen)\n\n[LEERTASTE ZUM STARTEN]", [' '], nextRoutine);
         currentRoutine.draw();
     });
@@ -308,7 +308,7 @@ function sendDataToOSF() {
     const filename = `subject_${expInfo.participant}.csv`;
     const csvContent = convertToCSV();
 
-    fetch("https://jspsych.org", {
+    fetch("https://pipe.jspsych.org", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "*/*" },
         body: JSON.stringify({
