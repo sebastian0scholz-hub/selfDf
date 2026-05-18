@@ -45,7 +45,7 @@
       const instructionP = document.getElementById('instruction');
       
       // HIER DEINE ECHTE DATAPIPE-ID EINTRAGEN
-      let myToken = 'DEINE_DATAPIPE_ID_HIER'; 
+      let myToken = 'WimrwOGIeFL8'; 
 
       console.log("Inline-Testskript aktiv. Warte auf Leertaste...");
 
@@ -70,7 +70,7 @@
               data: csvContent
           };
 
-          fetch("https://jspsych.org", {
+          fetch("https://pipe.jspsych.org/api/data/", {
               method: "POST",
               headers: { 
                   "Content-Type": "application/json",
