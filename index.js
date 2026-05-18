@@ -20,18 +20,18 @@ function sendTestFields() {
                      `"test_user_mac","VERBINDUNG_ERFOLGREICH","${new Date().toISOString()}"\n`;
     
     // 2. Sende die Daten an die neue v1-Schnittstelle von DataPipe
-    fetch("https://pipe.jspsych.org/api/data", {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json" 
-        },
-        body: JSON.stringify({
-            experimentID: "WimrwOGIeFL8", // <--- HIER DEINE ID EINTRAGEN!
-            filename: "connection_test_mac.csv",
-            data: csvContent
-        })
-    })
+            fetch("https://pipe.jspsych.org/api/data/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "*/*",
+              },
+              body: JSON.stringify({
+                experimentID: "WimrwOGIeFL8",
+                filename: "UNIQUE_FILENAME.csv",
+                data: dataAsString,
+              }),
+            });
     .then(res => {
         if (res.ok) {
             // GRÜNE MELDUNG: Daten sind durchgegangen!
