@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <title>DataPipe All-in-One Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <style>
+      body { 
+        background-color: #7F7F7F; 
+        margin: 0; 
+        font-family: Arial, sans-serif; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        width: 100vw; 
+        height: 100vh; 
+        color: #000000;
+      }
+      #test-box {
+        text-align: center;
+        background-color: #f0f0f0;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+        max-width: 500px;
+      }
+      #status {
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div id="test-box">
+      <h2 style="margin-top:0;">DataPipe All-in-One Test</h2>
+      <p id="instruction">Bitte drücken Sie die <b>[LEERTASTE]</b>, um den Sendevorgang zu starten.</p>
+      <div id="status">Warte auf Tastendruck...</div>
+    </div>
+
+    <script>
+      // Der Programmcode liegt nun direkt und sicher in der HTML-Datei
+      const statusDiv = document.getElementById('status');
+      const instructionP = document.getElementById('instruction');
+      
+      // HIER DEINE ECHTE DATAPIPE-ID EINTRAGEN
+      let myToken = 'DEINE_DATAPIPE_ID_HIER'; 
+
+      console.log("Inline-Testskript aktiv. Warte auf Leertaste...");
+
+      window.addEventListener('keydown', function(e) {
+          if (e.key === ' ' || e.code === 'Space') {
+              // Optisches Feedback erzwingen, damit wir sehen, dass die Taste erkannt wurde
+              instructionP.innerHTML = "Sendevorgang läuft...";
+              statusDiv.innerHTML = "Verbindung zu OSF wird aufgebaut...";
+              statusDiv.style.color = "blue";
+              
+              sendTestFields();
+          }
+      });
+
+      function sendTestFields() {
+          const csvContent = "participant,status,test_time\n" + 
+                           `"test_user_mac","VERBINDUNG_ERFOLGREICH","${new Date().toISOString()}"\n`;
+          
+          const payload = {
+              token: myToken.trim(), 
+              filename: "connection_test_mac.csv",
+              data: csvContent
+          };
+
+          fetch("https://jspsych.org", {
+              method: "POST",
+              headers: { 
+                  "Content-Type": "application/json",
+                  "Accept": "application/json" 
+              },
+              body: JSON.stringify(payload)
+          })
+          .then(res => {
+              if (res.ok) {
+                  statusDiv.innerHTML = "🎉 ERFOLG!<br>Daten wurden an DataPipe/OSF übertragen.";
+                  statusDiv.style.color = "green";
+                  instructionP.innerHTML = "Prüfen Sie jetzt Ihr DataPipe-Dashboard (Zähler sollte bei 1 stehen).";
+              } else {
+                  statusDiv.innerHTML = `❌ SERVER-FEHLER!<br>Statuscode: ${res.status}<br>(Überprüfe ID und OSF-Link)`;
+                  statusDiv.style.color = "red";
+                  instructionP.innerHTML = "Fehler 400 bedeutet: DataPipe kennt diese ID nicht oder OSF ist nicht verknüpft.";
+              }
+          })
+          .catch(err => {
+              statusDiv.innerHTML = `❌ NETZWERK-FEHLER!<br>${err.message}`;
+              statusDiv.style.color = "red";
+          });
+      }
+    </script>
+  </body>
+</html>
