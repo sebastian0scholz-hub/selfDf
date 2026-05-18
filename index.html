@@ -1,23 +1,70 @@
 <!doctype html>
 <html>
   <head>
+    <title>SRE & Directed Forgetting Experiment</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="user-scalable=no">
-    <title>index [PsychoPy]</title>
-    <!-- styles -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.css">
-    <link rel="stylesheet" href="./lib/psychojs-2021.2.3.css">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <!-- Online-Pfade für CSS-Stylesheets -->
+    <link rel="stylesheet" href="https://pavlovia.org">
+    <link rel="stylesheet" href="https://jquery.com">
+    
+    <style>
+      #form-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #7F7F7F; z-index: 99999;
+      }
+      #form-container {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background-color: #f0f0f0; padding: 30px; border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.3); font-family: Arial, sans-serif;
+        width: 350px; text-align: left; color: #000000;
+      }
+      .form-field { margin-bottom: 15px; }
+      .form-field label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+      .form-field input, .form-field select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+      #start-btn { width: 100%; padding: 10px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; }
+      #start-btn:hover { background-color: #555; }
+      #error-msg { color: red; font-size: 13px; font-weight: bold; margin-bottom: 10px; display: none; }
+    </style>
   </head>
-  <body>
+  <body style="background-color: #7F7F7F; margin: 0px; overflow: hidden; width: 100%; height: 100%;">
+    
+    <div id="form-overlay">
+      <div id="form-container">
+        <h3 style="margin-top: 0; text-align: center;">Gedächtnisstudie</h3>
+        <div id="error-msg">Bitte füllen Sie alle Felder aus!</div>
+        
+        <div class="form-field">
+          <label for="input-alter">Alter:</label>
+          <input type="number" id="input-alter" min="1" max="100">
+        </div>
+        
+        <div class="form-field">
+          <label for="select-geschlecht">Geschlecht:</label>
+          <select id="select-geschlecht">
+            <option value="Auswahl">-- Bitte wählen --</option>
+            <option value="männlich">männlich</option>
+            <option value="weiblich">weiblich</option>
+            <option value="divers">divers</option>
+          </select>
+        </div>
+        
+        <div class="form-field">
+          <label for="input-beruf">Beruf:</label>
+          <input type="text" id="input-beruf">
+        </div>
+        
+        <button id="start-btn">Experiment starten</button>
+      </div>
+    </div>
+
     <div id="root"></div>
-    <!-- external libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/preloadjs@1.0.1/lib/preloadjs.min.js"></script>
-    <!-- experiment -->
-    <script src="./index.js" type="module"></script>
-    <!-- legacy browsers -->
-    <script src="./lib/psychojs-2021.2.3.iife.js" nomodule></script>
-    <script src="./index-legacy-browsers.js" nomodule></script>
+
+    <!-- Online-Pfade für benötigte Web-Bibliotheken -->
+    <script src="https://jquery.com"></script>
+    <script src="https://jquery.com"></script>
+    <script src="https://createjs.com"></script>
+    <script type="module" src="./index.js"></script>
   </body>
 </html>
