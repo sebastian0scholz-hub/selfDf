@@ -26,6 +26,7 @@ function wrapText(text, x, y, maxWidth, lineHeight, align = "center") {
     let totalHeight = lines.length * lineHeight; let currentY = y - (totalHeight / 2) + (lineHeight / 2);
     ctx.textAlign = align;
     for (let k = 0; k < lines.length; k++) { ctx.fillText(lines[k], x, currentY); currentY += lineHeight; }
+    return totalHeight; // Gibt die echte Höhe zurück für relative Platzierungen
 }
 
 const posPool = ["pünktlich", "ehrlich", "kreativ", "mutig", "treu", "klug", "höflich", "fair", "aktiv", "warm", "stark", "ruhig", "weise", "froh", "offen", "witzig", "sanft", "heiter", "stolz", "flexibel", "charmant", "fokussiert", "geduldig", "gütig", "heldenhaft", "genial", "herzlich", "tolerant", "vital", "loyal", "achtsam", "fleißig", "reif", "sicher", "optimistisch", "dynamisch", "edel", "geschickt", "logisch", "munter", "aufgeweckt", "bescheiden", "diszipliniert", "eloquent", "empathisch", "fürsorglich", "humorvoll", "innovativ", "kompetent", "lebensfroh", "liebenswürdig", "motiviert", "produktiv", "zuverlässig", "selbstbewusst", "sorgfältig", "spontan", "tapfer", "umsichtig", "zielstrebig", "authentisch", "begeistert", "besonnen", "diplomatisch", "einfühlsam", "engagiert", "friedlich", "großzügig", "hilfbereit", "höflich", "inspirierend", "liebenswert", "mitfühlend", "organisiert", "respektvoll", "souverän", "tatkräftig", "verständnisvoll", "visionär", "warmherzig"];
@@ -99,14 +100,21 @@ class ResponsiveScreen {
     }
     draw() {
         ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#000000"; ctx.textBaseline = "middle";
-        let baseSize = Math.max(canvas.width, canvas.height); let scaleFactor = isMobile ? 1.8 : 1.0;
-        let titleSize = this.isStimulus ? Math.round(baseSize * 0.0275 * scaleFactor) : Math.round(baseSize * 0.013 * scaleFactor);
+        let baseSize = Math.max(canvas.width, canvas.height); let scaleFactor = isMobile ? 1.6 : 1.0;
+        let titleSize = this.isStimulus ? Math.round(baseSize * 0.025 * scaleFactor) : Math.round(baseSize * 0.013 * scaleFactor);
+        
         ctx.font = "bold " + titleSize + "px Arial"; let maxWidth = canvas.width * 0.90;
-        let titleY = this.sub ? canvas.height * 0.28 : canvas.height * 0.50;
+        
+        // KORREKTUR: Flexible vertikale Verschiebung für Smartphones, damit längere Sätze nicht oben rausfallen
+        let titleY = isMobile ? canvas.height * 0.35 : (this.sub ? canvas.height * 0.28 : canvas.height * 0.50);
         wrapText(this.title, canvas.width / 2, titleY, maxWidth, titleSize * 1.3, "center");
+        
         if (this.sub) {
-            let subY = canvas.height * 0.70; let subX = this.alignSub === "left" && !isMobile ? canvas.width / 2 - 80 : canvas.width / 2;
-            wrapText(this.sub, subX, subY, maxWidth, titleSize * 1.3, isMobile ? "center" : this.alignSub);
+            let subSize = this.isStimulus ? Math.round(baseSize * 0.028 * scaleFactor) : titleSize;
+            ctx.font = "bold " + subSize + "px Arial";
+            let subY = isMobile ? canvas.height * 0.58 : canvas.height * 0.70; 
+            let subX = this.alignSub === "left" && !isMobile ? canvas.width / 2 - 80 : canvas.width / 2;
+            wrapText(this.sub, subX, subY, maxWidth, subSize * 1.4, isMobile ? "center" : this.alignSub);
         }
     }
     handleKey(key) {
@@ -122,28 +130,27 @@ function startExperiment() {
     routines.push(() => { currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
     routines.push(() => { currentRoutine = new ResponsiveScreen("Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die angezeigten Buttons zum Antworten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
     
-    const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich nachlässig bin ich hin und wieder gewiss nicht.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
+    const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich habe nicht viel, worauf ich stolz sein könnte.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
     rosenbergItems.forEach(item => {
         routines.push(() => { currentRoutine = new ResponsiveScreen(item, isMobile ? "" : "1 = Trifft gar nicht zu\n2 = Trifft eher nicht zu\n3 = Trifft eher zu\n4 = Trifft voll zu", ['1','2','3','4'], (key, rt) => { compiledData.push({ section: 'rosenberg', item: item, response: key, rt: rt }); nextRoutine(); }, false, "left"); currentRoutine.draw(); });
     });
     
     routines.push(() => {
         let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.\n\nNach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt.`;
-        currentRoutine = new ResponsiveScreen(text, null, [' '], nextRoutine); currentRoutine.draw();
+        currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); currentRoutine.draw();
     });
     
     learningItems.forEach(item => {
         routines.push(() => {
-            let baseSize = Math.max(canvas.width, canvas.height); let fixSize = isMobile ? Math.round(baseSize*0.0275*1.8) : Math.round(baseSize*0.0275);
+            let baseSize = Math.max(canvas.width, canvas.height); let fixSize = isMobile ? Math.round(baseSize*0.0275*1.6) : Math.round(baseSize*0.0275);
             currentRoutine = { draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#000000"; ctx.font = "bold " + fixSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); }, handleKey: () => {} }; currentRoutine.draw();
             setTimeout(() => {
                 let pcPrompt = "\n\n[F] = NEIN    [J] = JA";
-                // KORREKTUR: item.prompt (die Frage zur Person) wird nun sauber als Haupttitel übergeben, das Adjektiv steht darunter im Subtext
                 currentRoutine = new ResponsiveScreen(item.prompt, isMobile ? item.word.toUpperCase() : item.word.toUpperCase() + pcPrompt, ['f', 'j'], (key, rt) => {
                     compiledData.push({ section: 'learning', word: item.word, ref: item.ref, cue: item.cue, response: key === 'f'?'Nein':'Ja', rt: rt });
                     currentRoutine = { draw: () => {
                         ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = item.cue === "MERKEN" ? "#006400" : "#8B0000"; 
-                        let cueSize = isMobile ? Math.round(Math.max(canvas.width, canvas.height)*0.025*1.8) : Math.round(Math.max(canvas.width, canvas.height)*0.025);
+                        let cueSize = isMobile ? Math.round(Math.max(canvas.width, canvas.height)*0.025*1.6) : Math.round(Math.max(canvas.width, canvas.height)*0.025);
                         ctx.font = "bold " + cueSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText(item.cue, canvas.width/2, canvas.height/2);
                     }, handleKey: () => {} }; currentRoutine.draw();
                     setTimeout(nextRoutine, 3000); 
@@ -163,7 +170,7 @@ function startExperiment() {
     
     testItems.forEach(item => {
         routines.push(() => {
-            let baseSize = Math.max(canvas.width, canvas.height); let fixSize = isMobile ? Math.round(baseSize*0.0275*1.8) : Math.round(baseSize*0.0275);
+            let baseSize = Math.max(canvas.width, canvas.height); let fixSize = isMobile ? Math.round(baseSize*0.0275*1.6) : Math.round(baseSize*0.0275);
             currentRoutine = { draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#000000"; ctx.font = "bold " + fixSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); }, handleKey: () => {} }; currentRoutine.draw();
             setTimeout(() => {
                 currentRoutine = new ResponsiveScreen(item.word.toUpperCase(), isMobile ? "" : "[F] = NEU       [J] = ALT", ['f', 'j'], (key, rt) => {
@@ -185,7 +192,7 @@ function startExperiment() {
         sendDataToOSF();
         currentRoutine = { draw: () => {
             ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#000000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            let baseSize = Math.max(canvas.width, canvas.height); let endSize = isMobile ? Math.round(baseSize * 0.011 * 1.8) : Math.round(baseSize * 0.011);
+            let baseSize = Math.max(canvas.width, canvas.height); let endSize = isMobile ? Math.round(baseSize * 0.011 * 1.6) : Math.round(baseSize * 0.011);
             ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Vielen Dank für Ihre Teilnahme!", canvas.width/2, canvas.height/2 - 40);
             ctx.fillText("Ihr SurveyCircle-Freischaltcode lautet:", canvas.width/2, canvas.height/2 + 5);
             ctx.fillStyle = "#8B0000"; ctx.fillText("XXXX-XXXX-XXXX", canvas.width/2, canvas.height/2 + 45); 
