@@ -114,7 +114,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
     startExperiment();
 });
 
-// Kontrollklasse für Bildschirme (Texte deutlich verkleinert)
+// Kontrollklasse für Bildschirme
 class ResponsiveScreen {
     constructor(title, sub, allowedKeys, callback, isStimulus = false, alignSub = "center") {
         this.title = title; this.sub = sub; this.allowedKeys = allowedKeys; this.callback = callback;
@@ -127,19 +127,17 @@ class ResponsiveScreen {
         ctx.fillStyle = "#000000"; ctx.textBaseline = "middle";
         
         let baseSize = Math.max(canvas.width, canvas.height);
-        // TEXTGRÖSSEN HALBIERT: Stimuli ca. 2.75% der Fenstergröße, Instruktionen ca. 1.3%
         let titleSize = this.isStimulus ? Math.round(baseSize * 0.0275) : Math.round(baseSize * 0.013);
         let subSize = Math.round(baseSize * 0.009);
         
         ctx.font = `bold ${titleSize}px Arial`;
         let maxWidth = canvas.width * 0.85;
-        let titleY = canvas.height * 0.35;
+        let titleY = canvas.height * 0.32; // Leicht angehoben für längere Texte
         wrapText(this.title, canvas.width / 2, titleY, maxWidth, titleSize * 1.3, "center");
         
         if (this.sub) {
             ctx.font = `${subSize}px Arial`;
             let subY = canvas.height * 0.70;
-            // Wenn Rosenberg läuft (untereinander gelistet), leicht nach links versetzen für sauberen Linksbündigkeits-Block
             let subX = this.alignSub === "left" ? canvas.width / 2 - 80 : canvas.width / 2;
             wrapText(this.sub, subX, subY, maxWidth, subSize * 1.5, this.alignSub);
         }
@@ -156,19 +154,18 @@ let routines = [];
 function startExperiment() {
     // 1. Willkommen
     routines.push(() => {
-        currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!", "[LEERTASTE DRÜCKEN ZUM FORTFAHREN]", [' ']);
+        currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!", "[LEERTASTE DRÜCKEN ZUM FORTFAHREN]", [' '], nextRoutine);
         currentRoutine.draw();
     });
     // 2. Rosenberg Anleitung
     routines.push(() => {
-        currentRoutine = new ResponsiveScreen("Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die Tasten 1, 2, 3 oder 4 zum Antworten.", "[LEERTASTE DRÜCKEN]", [' ']);
+        currentRoutine = new ResponsiveScreen("Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die Tasten 1, 2, 3 oder 4 zum Antworten.", "[LEERTASTE DRÜCKEN]", [' '], nextRoutine);
         currentRoutine.draw();
     });
-    // Rosenberg Items (Untereinander formatiert)
+    // Rosenberg Items
     const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich habe nicht viel, worauf ich stolz sein könnte.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
     rosenbergItems.forEach(item => {
         routines.push(() => {
-            // "left" sorgt für untereinander stehende, zentrierte Zeilen
             currentRoutine = new ResponsiveScreen(item, "1 = Trifft gar nicht zu\n2 = Trifft eher nicht zu\n3 = Trifft eher zu\n4 = Trifft voll zu", ['1','2','3','4'], (key, rt) => {
                 compiledData.push({ section: 'rosenberg', item: item, response: key, rt: rt });
                 nextRoutine();
@@ -176,10 +173,11 @@ function startExperiment() {
             currentRoutine.draw();
         });
     });
-    // 3. Lernen Anleitung
+    // 3. Lernen Anleitung (Text wunschgemäß modifiziert)
     routines.push(() => {
         let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.`;
-        currentRoutine = new ResponsiveScreen(text, "Nach der Einschätzung folgt das Signal MERKEN oder VERGESSEN.\n\n[LEERTASTE ZUM STARTEN]", [' ']);
+        let subText = "Nach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt.\n\n[LEERTASTE ZUM STARTEN]";
+        currentRoutine = new ResponsiveScreen(text, subText, [' '], nextRoutine);
         currentRoutine.draw();
     });
     // Lernliste Durchgang
@@ -209,9 +207,10 @@ function startExperiment() {
         currentRoutine = new ResponsiveScreen(text, "[LEERTASTE DRÜCKEN ZUM STARTEN]", [' '], runDistractorGame);
         currentRoutine.draw();
     });
-    // 5. Test Anleitung
+    // 5. Test Anleitung (Text wunschgemäß modifiziert)
     routines.push(() => {
-        currentRoutine = new ResponsiveScreen("ÜBERRASCHUNGSTEST!\nEntscheiden Sie so schnell wie möglich, ob das Wort gelernt wurde oder NEU ist.", "[F] = NEU       [J] = ALT (vorgekommen)\n\n[LEERTASTE ZUM STARTEN]", [' ']);
+        let text = "ÜBERRASCHUNGSTEST!\n\nEntscheiden sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob sie das wort merken oder vergessen sollten.";
+        currentRoutine = new ResponsiveScreen(text, "[F] = NEU       [J] = ALT (vorgekommen)\n\n[LEERTASTE ZUM STARTEN]", [' '], nextRoutine);
         currentRoutine.draw();
     });
     // Testliste Durchgang
@@ -232,7 +231,7 @@ function startExperiment() {
     });
     // 6. Post-Fragen Anleitung
     routines.push(() => {
-        currentRoutine = new ResponsiveScreen("Zum Abschluss bitten wir Sie noch um die Beantwortung von fünf kurzen Fragen.", "[LEERTASTE DRÜCKEN]", [' ']);
+        currentRoutine = new ResponsiveScreen("Zum Abschluss bitten wir Sie noch um die Beantwortung von fiete kurzen Fragen.", "[LEERTASTE DRÜCKEN]", [' '], nextRoutine);
         currentRoutine.draw();
     });
     const postQuestions = ["Haben Sie von der fremden Person ein konkretes Bild im Kopf gehabt?", "Haben Sie versucht, sich die zu merkenden Wörter aktiv zu merken?", "Haben Sie versucht, die zu vergessenden Wörter absichtlich zu vergessen?", "Haben Sie während der Lernphase Notizen gemacht (z. B. auf Papier oder am PC)?", "Haben Sie an diesem Experiment ernsthaft und konzentriert teilgenommen?"];
@@ -326,7 +325,7 @@ function sendDataToOSF() {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "*/*" },
         body: JSON.stringify({
-            experimentID: "WimrwOGIeFL8", 
+            experimentID: "DEINE_DATAPIPE_EXPERIMENT_ID_HIER", 
             filename: filename,
             data: csvContent
         })
