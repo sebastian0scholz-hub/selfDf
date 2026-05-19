@@ -2,345 +2,53 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SRE Directed Forgetting Experiment</title>
-    <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #7F7F7F; font-family: Arial, sans-serif; }
-        
-        /* Start-Formular Overlay */
-        #form-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #7F7F7F; display: flex; justify-content: center; align-items: center; z-index: 10; padding: 20px; }
-        .form-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
-        #start-btn { width: 100%; padding: 12px; background: #2980b9; color: white; border: none; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        #start-btn:hover { background: #3498db; }
-        #error-msg { color: #c0392b; font-weight: bold; margin-bottom: 15px; display: none; }
-        
-        /* Canvas & Experiment Umgebung */
-        #canvas-container { width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; position: relative; }
-        canvas { display: block; }
-        
-        /* Mobile Touch-Buttons */
-        .mobile-btn-container { position: absolute; bottom: 10%; left: 0; width: 100%; display: none; justify-content: space-around; padding: 0 20px; z-index: 5; }
-        .mobile-btn { padding: 20px 40px; font-size: 22px; font-weight: bold; color: white; background: #333; border: 2px solid white; border-radius: 8px; min-width: 140px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .mobile-btn:active { background: #555; }
-        
-        /* Nummerntasten für Rosenberg auf Mobilgeräten */
-        #mobile-number-buttons { bottom: 5%; flex-wrap: wrap; justify-content: center; gap: 10px; }
-        .num-btn { padding: 15px 25px; font-size: 18px; min-width: 60px; }
-        
-        /* Download Overlay ganz am Ende */
-        #download-overlay { display: none; position: absolute; top: 65%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: white; padding: 25px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; max-width: 90%; width: 340px; }
-        #download-btn { padding: 12px 24px; font-size: 16px; font-weight: bold; color: white; background-color: #27ae60; border: none; border-radius: 4px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        #download-btn:hover { background-color: #2ecc71; }
-    </style>
+    <title>GitHub Pages -> Google Forms Test</title>
 </head>
-<body>
+<body style="font-family: Arial, sans-serif; padding: 40px; text-align: center; background-color: #f4f4f4;">
 
-    <!-- 1. Demografisches Start-Formular -->
-    <div id="form-overlay">
-        <div class="form-card">
-            <h2 style="margin-top:0; color:#2980b9;">Willkommen</h2>
-            <p style="color:#666; font-size:14px; margin-bottom:20px;">Bitte füllen Sie die Angaben aus, um das Experiment zu starten.</p>
-            <div id="error-msg">Bitte alle Felder ausfüllen!</div>
-            <div class="form-group">
-                <label for="input-alter">Alter:</label>
-                <input type="number" id="input-alter" min="1" max="100">
-            </div>
-            <div class="form-group">
-                <label for="select-geschlecht">Geschlecht:</label>
-                <select id="select-geschlecht">
-                    <option value="Auswahl">-- Bitte wählen --</option>
-                    <option value="Weiblich">Weiblich</option>
-                    <option value="Männlich">Männlich</option>
-                    <option value="Divers">Divers</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="input-beruf">Beruf / Studiengang:</label>
-                <input type="text" id="input-beruf">
-            </div>
-            <button id="start-btn">Experiment starten</button>
-        </div>
-    </div>
+    <h2>GitHub zu Google Forms Live-Test</h2>
+    <p>Dieser Test simuliert deine Experiment-Daten und sendet sie über eine sichere Iframe-Pipeline von GitHub zu Google Forms.</p>
+    
+    <button id="send-btn" style="padding: 15px 30px; font-size: 18px; cursor: pointer; background: #E67E22; color: white; border: none; border-radius: 4px; font-weight: bold;">
+        🚀 Testdaten von GitHub senden
+    </button>
 
-    <!-- 2. Experimentier-Bereich (Canvas und Steuerungen) -->
-    <div id="canvas-container">
-        <canvas id="experiment-canvas"></canvas>
-        
-        <!-- Touch-Buttons für Binärentscheidungen (Ja/Nein, Alt/Neu) -->
-        <div id="mobile-binary-buttons" class="mobile-btn-container">
-            <button id="btn-left" class="mobile-btn">LINKS</button>
-            <button id="btn-right" class="mobile-btn">RECHTS</button>
-        </div>
-        
-        <!-- Touch-Buttons für Rosenberg-Skala (1-4) -->
-        <div id="mobile-number-buttons" class="mobile-btn-container">
-            <button id="btn-1" class="mobile-btn num-btn">1</button>
-            <button id="btn-2" class="mobile-btn num-btn">2</button>
-            <button id="btn-3" class="mobile-btn num-btn">3</button>
-            <button id="btn-4" class="mobile-btn num-btn">4</button>
-        </div>
-
-    </div>
+    <p id="status-msg" style="margin-top: 20px; font-weight: bold; color: blue;"></p>
 
     <script>
-        // GLOBALE VARIABLEN & EXPERIMENT-DATEN
-        let expName = 'SRE_DirectedForgetting';
-        let expInfo = { 'participant': '', 'Alter': '', 'Geschlecht': '', 'Beruf': '', 'date': new Date().toISOString() };
-        let currentRoutine = null; let compiledData = [];
-        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // Deine simulierten CSV-Daten aus dem Experiment
+        const simulierteCSV = 
+`participant,alter,geschlecht,beruf,section,word,true_type,ref,cue,question,response,correct,rt
+"GITHUB_TEST_USER","21","Divers","GitHub-Tester","learning","VERBINDUNG","old","self","MERKEN","","Ja","", "0.32"
+"GITHUB_TEST_USER","21","Divers","GitHub-Tester","test","VERBINDUNG","old","self","MERKEN","","old","1", "0.45"`;
 
-        const canvas = document.getElementById('experiment-canvas'); const ctx = canvas.getContext('2d');
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; if(currentRoutine) currentRoutine.draw(); }
-        window.addEventListener('resize', resizeCanvas); window.addEventListener('orientationchange', () => { setTimeout(resizeCanvas, 200); }); resizeCanvas();
+        document.getElementById('send-btn').addEventListener('click', () => {
+            const status = document.getElementById('status-msg');
+            status.style.color = "blue";
+            status.innerText = "Sende Daten über GitHub-Pipeline... Bitte 2 Sekunden warten.";
 
-        function wrapText(text, x, y, maxWidth, lineHeight, align = "center") {
-            let words = text.split(' '); let line = ''; let lines = [];
-            for (let n = 0; n < words.length; n++) {
-                if (words[n].includes('\n')) {
-                    let parts = words[n].split('\n');
-                    for (let i = 0; i < parts.length; i++) {
-                        let testLine = line + parts[i] + ' '; let metrics = ctx.measureText(testLine);
-                        if (metrics.width > maxWidth && n > 0) { lines.push(line); line = parts[i] + ' '; } else { line = testLine; }
-                        if (i < parts.length - 1) { lines.push(line); line = ''; }
-                    }
-                } else {
-                    let testLine = line + words[n] + ' '; let metrics = ctx.measureText(testLine);
-                    if (metrics.width > maxWidth && n > 0) { lines.push(line); line = words[n] + ' '; } else { line = testLine; }
-                }
-            }
-            lines.push(line);
-            let totalHeight = lines.length * lineHeight; let currentY = y - (totalHeight / 2) + (lineHeight / 2);
-            ctx.textAlign = align;
-            for (let k = 0; k < lines.length; k++) { ctx.fillText(lines[k], x, currentY); currentY += lineHeight; }
-            return totalHeight;
-        }
-
-        // WORTPOOLS & RANDOMISIERUNG
-        const posPool = ["pünktlich", "ehrlich", "kreativ", "mutig", "treu", "klug", "höflich", "fair", "aktiv", "warm", "stark", "ruhig", "weise", "froh", "offen", "witzig", "sanft", "heiter", "stolz", "flexibel", "charmant", "fokussiert", "geduldig", "gütig", "heldenhaft", "genial", "herzlich", "tolerant", "vital", "loyal", "achtsam", "fleißig", "reif", "sicher", "optimistisch", "dynamisch", "edel", "geschickt", "logisch", "munter", "aufgeweckt", "bescheiden", "diszipliniert", "eloquent", "empathisch", "fürsorglich", "humorvoll", "innovativ", "kompetent", "lebensfroh", "liebenswürdig", "motiviert", "produktiv", "zuverlässig", "selbstbewusst", "sorgfältig", "spontan", "tapfer", "umsichtig", "zielstrebig", "authentisch", "begeistert", "besonnen", "diplomatisch", "einfühlsam", "engagiert", "friedlich", "großzügig", "hilfbereit", "höflich", "inspirierend", "liebenswert", "mitfühlend", "organisiert", "respektvoll", "souverän", "tatkräftig", "verständnisvoll", "visionär", "warmherzig"];
-        const negPool = ["faul", "gierig", "feige", "neidisch", "stur", "zornig", "frech", "kalt", "träge", "lax", "grob", "starr", "naiv", "böse", "scheu", "wirr", "hart", "falsch", "sauer", "arrogant", "chaotisch", "egoistisch", "geizig", "hinterlistig", "ignorant", "kleinlich", "launisch", "rachsüchtig", "unhöflich", "ängstlich", "bitter", "dreist", "eitel", "herzlos", "intolerant", "kritisch", "nachlässig", "oberflächlich", "passiv", "reizbar", "schadenfroh", "skeptisch", "taktlos", "überheblich", "ungeduldig", "unzuverlässig", "verbittert", "vorlaut", "zäh", "aggressiv", "bequem", "dominant", "eingebildet", "frustriert", "gleichgültig", "heuchlerisch", "kompliziert", "misstrauisch", "nachgiebig", "neurotisch", "pedantisch", "pessimistisch", "rücksichtslos", "schüchtern", "streitsüchtig", "unentschlossen", "unorganisiert", "unzufrieden", "verlogen", "verschlossen", "vorsichtig", "wankelmütig", "wehleidig", "wortkarg", "zynisch", "wütend", "verbissen"];
-        posPool.sort(() => Math.random() - 0.5); negPool.sort(() => Math.random() - 0.5);
-
-        let learnPos = posPool.slice(0, 40); let testDistPos = posPool.slice(40);
-        let learnNeg = negPool.slice(0, 40); let testDistNeg = negPool.slice(40);
-        let fremdName = Math.random() < 0.5 ? "Leon" : "Leonie";
-        let beschreibungFremd = `${fremdName} ist 24 Jahre alt, studiert Wirtschaftswissenschaften in einer deutschen Großstadt, treibt gerne Sport und trifft sich oft mit Freunden.`;
-
-        let learningItems = [];
-        function addItems(list, count, ref, prompt) {
-            for (let i = 0; i < count; i++) {
-                let w = list.pop();
-                learningItems.push({ word: w, ref: ref, prompt: prompt, cue: (i % 2 === 0) ? "MERKEN" : "VERGESSEN", type: 'old' });
-            }
-        }
-        addItems(learnPos, 20, "self", "Beschreibt dieses Wort DICH?");
-        addItems(learnNeg, 20, "self", "Beschreibt dieses Wort DICH?");
-        addItems(learnPos, 20, "other", `Beschreibt dieses Wort ${fremdName}?`);
-        addItems(learnNeg, 20, "other", `Beschreibt dieses Wort ${fremdName}?`);
-        learningItems.sort(() => Math.random() - 0.5);
-
-        let testItems = [...learningItems];
-        testDistPos.forEach(w => testItems.push({ word: w, type: 'new', ref: 'none', cue: 'none' }));
-        testDistNeg.forEach(w => testItems.push({ word: w, type: 'new', ref: 'none', cue: 'none' }));
-        testItems.sort(() => Math.random() - 0.5);
-
-        // EVENT-LISTENER FÜR DEN START-BUTTON
-        document.getElementById('start-btn').addEventListener('click', () => {
-            const alter = document.getElementById('input-alter').value; const geschlecht = document.getElementById('select-geschlecht').value; const beruf = document.getElementById('input-beruf').value;
-            if (!alter || geschlecht === "Auswahl" || !beruf) { document.getElementById('error-msg').style.display = "block"; return; }
-            const urlParams = new URLSearchParams(window.location.search);
-            expInfo.participant = urlParams.get('participant') || "web_" + Math.floor(Math.random()*100000);
-            expInfo.Alter = alter; expInfo.Geschlecht = geschlecht; expInfo.Beruf = beruf;
-	// HIERZUFÜGEN: Speichert den Gerätetyp direkt als ersten Eintrag in den Daten
-	   compiledData.push({ 
-           section: 'device_info', 
-           true_type: isMobile ? 'Mobilgerät (Smartphone/Tablet)' : 'Computer/Laptop' 
-	    });
-            document.getElementById('form-overlay').style.display = 'none'; document.getElementById('canvas-container').style.display = 'flex';
-            resizeCanvas(); startExperiment();
-        });
-
-        // SCREEN-STEUERUNG UND GRAFIK-ENGINE
-        class ResponsiveScreen {
-            constructor(title, sub, allowedKeys, callback, isStimulus = false, alignSub = "center", buttonType = "none") {
-                this.title = title; this.sub = sub; this.allowedKeys = allowedKeys; this.callback = callback;
-                this.isStimulus = isStimulus; this.alignSub = alignSub; this.buttonType = buttonType;
-                this.startTime = performance.now(); this.active = true;
-                this.setupMobileControls();
-            }
-            setupMobileControls() {
-                const binButtons = document.getElementById('mobile-binary-buttons'); const numButtons = document.getElementById('mobile-number-buttons');
-                const bLeft = document.getElementById('btn-left'); const bRight = document.getElementById('btn-right');
-                if (isMobile && this.buttonType === "binary-learn") {
-                    binButtons.style.display = 'flex'; numButtons.style.display = 'none';
-                    bLeft.innerHTML = "NEIN"; bRight.innerHTML = "JA";
-                    bLeft.onclick = () => this.handleKey('f'); bRight.onclick = () => this.handleKey('j');
-                } else if (isMobile && this.buttonType === "binary-test") {
-                    binButtons.style.display = 'flex'; numButtons.style.display = 'none';
-                    bLeft.innerHTML = "NEU"; bRight.innerHTML = "ALT";
-                    bLeft.onclick = () => this.handleKey('f'); bRight.onclick = () => this.handleKey('j');
-                } else if (isMobile && this.buttonType === "binary-post") {
-                    binButtons.style.display = 'flex'; numButtons.style.display = 'none';
-                    bLeft.innerHTML = "NEIN"; bRight.innerHTML = "JA";
-                    bLeft.onclick = () => this.handleKey('f'); bRight.onclick = () => this.handleKey('j');
-                } else if (isMobile && this.allowedKeys.includes('1')) {
-                    binButtons.style.display = 'none'; numButtons.style.display = 'flex';
-                    document.getElementById('btn-1').onclick = () => this.handleKey('1'); document.getElementById('btn-2').onclick = () => this.handleKey('2');
-                    document.getElementById('btn-3').onclick = () => this.handleKey('3'); document.getElementById('btn-4').onclick = () => this.handleKey('4');
-                } else {
-                    binButtons.style.display = 'none'; numButtons.style.display = 'none';
-                    if (isMobile && this.allowedKeys.includes(' ')) { canvas.onclick = () => this.handleKey(' '); }
-                }
-            }
-            draw() {
-                ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#000000"; ctx.textBaseline = "middle";
-                let baseSize = Math.max(canvas.width, canvas.height); let scaleFactor = isMobile ? 1.6 : 1.0;
-                let titleSize = this.isStimulus ? Math.round(baseSize * 0.025 * scaleFactor) : Math.round(baseSize * 0.013 * scaleFactor);
-                
-                ctx.font = "bold " + titleSize + "px Arial"; let maxWidth = canvas.width * 0.90;
-                let titleY = isMobile ? canvas.height * 0.35 : (this.sub ? canvas.height * 0.28 : canvas.height * 0.50);
-                wrapText(this.title, canvas.width / 2, titleY, maxWidth, titleSize * 1.3, "center");
-                
-                if (this.sub) {
-                    let subSize = this.isStimulus ? Math.round(baseSize * 0.028 * scaleFactor) : titleSize;
-                    ctx.font = "bold " + subSize + "px Arial";
-                    let subY = isMobile ? canvas.height * 0.58 : canvas.height * 0.70; 
-                    let subX = this.alignSub === "left" && !isMobile ? canvas.width / 2 - 80 : canvas.width / 2;
-                    wrapText(this.sub, subX, subY, maxWidth, subSize * 1.4, isMobile ? "center" : this.alignSub);
-                }
-            }
-            handleKey(key) {
-                if (!this.active || !this.allowedKeys.includes(key)) return;
-                this.active = false; canvas.onclick = null;
-                document.getElementById('mobile-binary-buttons').style.display = 'none'; document.getElementById('mobile-number-buttons').style.display = 'none';
-                let rt = (performance.now() - this.startTime) / 1000; this.callback(key, rt);
-            }
-        }
-
-        // ENTWICKLUNG DER EXPERIMENT-ROUTINEN
-        let routines = [];
-        function startExperiment() {
-            routines.push(() => { currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten. Wenn Sie sich unwohl fühlen können Sie jederzeit ohne Angabe von Gründen das Fenster schließen.\n\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
-            routines.push(() => { currentRoutine = new ResponsiveScreen("Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die angezeigten Buttons zum Antworten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
-            
-            const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich habe nicht viel, worauf ich stolz sein könnte.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
-            rosenbergItems.forEach(item => {
-                routines.push(() => { currentRoutine = new ResponsiveScreen(item, isMobile ? "" : "1 = Trifft gar nicht zu\n2 = Trifft eher nicht zu\n3 = Trifft eher zu\n4 = Trifft voll zu", ['1','2','3','4'], (key, rt) => { compiledData.push({ section: 'rosenberg', item: item, response: key, rt: rt }); nextRoutine(); }, false, "left"); currentRoutine.draw(); });
-            });
-
-            routines.push(() => {
-                let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.\n\nNach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt.`;
-                currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); currentRoutine.draw();
-            });
-            
-            learningItems.forEach(item => {
-                routines.push(() => {
-                    let baseSize = Math.max(canvas.width, canvas.height); let fixSize = isMobile ? Math.round(baseSize*0.0275*1.6) : Math.round(baseSize*0.0275);
-                    currentRoutine = { draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#000000"; ctx.font = "bold " + fixSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); }, handleKey: () => {} }; currentRoutine.draw();
-                    setTimeout(() => {
-                        let pcPrompt = "\n\n[F] = NEIN    [J] = JA";
-                        currentRoutine = new ResponsiveScreen(item.prompt, isMobile ? item.word.toUpperCase() : item.word.toUpperCase() + pcPrompt, ['f', 'j'], (key, rt) => {
-                            compiledData.push({ section: 'learning', word: item.word, ref: item.ref, cue: item.cue, response: key === 'f'?'Nein':'Ja', rt: rt });
-                            currentRoutine = { draw: () => {
-                                ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = item.cue === "MERKEN" ? "#006400" : "#8B0000"; 
-                                let cueSize = isMobile ? Math.round(Math.max(canvas.width, canvas.height)*0.025*1.6) : Math.round(Math.max(canvas.width, canvas.height)*0.025);
-                                ctx.font = "bold " + cueSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText(item.cue, canvas.width/2, canvas.height/2);
-                            }, handleKey: () => {} }; currentRoutine.draw();
-                            setTimeout(nextRoutine, 1500); 
-                        }, true, "center", "binary-learn"); currentRoutine.draw();
-                    }, 500);
-                });
-            });
-            routines.push(() => { 
-                let text = "Aufgabe 2 (Dauer: 60 Sekunden):\n\nEs erscheint gleich ein Quadrat in der Bildschirmmitte.\n\nWenn das Quadrat GRÜN wird -> " + (isMobile ? "Auf den Bildschirm tippen!" : "LEERTASTE drücken!") + "\nWenn das Quadrat ROT wird -> Machen Sie NICHTS!";
-                currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], runDistractorGame); currentRoutine.draw(); 
-            });
-            routines.push(() => { 
-                let text = "Aufgabe 3\n\nEntscheiden Sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob Sie das Wort merken oder vergessen sollten oder ob es Sie oder die andere Person betraf.";
-                currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); currentRoutine.draw(); 
-            });
-            
-            testItems.forEach(item => {
-                routines.push(() => {
-                    let baseSize = Math.max(canvas.width, canvas.height); let fixSize = isMobile ? Math.round(baseSize*0.0275*1.6) : Math.round(baseSize*0.0275);
-                    currentRoutine = { draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#000000"; ctx.font = "bold " + fixSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); }, handleKey: () => {} }; currentRoutine.draw();
-                    setTimeout(() => {
-                        currentRoutine = new ResponsiveScreen(item.word.toUpperCase(), isMobile ? "" : "[F] = NEU       [J] = ALT", ['f', 'j'], (key, rt) => {
-                            let resp = key === 'f' ? 'new' : 'old';
-                            compiledData.push({ section: 'test', word: item.word, true_type: item.type, ref: item.ref, cue: item.cue, response: resp, correct: resp === item.type ? 1:0, rt: rt });
-                            nextRoutine();
-                        }, true, "center", "binary-test"); currentRoutine.draw();
-                    }, 500);
-                });
-            });
-
-            routines.push(() => { currentRoutine = new ResponsiveScreen("Zum Abschluss bitten wir Sie noch um die Beantwortung von fünf kurzen Fragen.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DR脺CKEN]", [' '], nextRoutine); currentRoutine.draw(); });
-            const postQuestions = ["Haben Sie von der fremden Person ein konkretes Bild im Kopf gehabt?", "Haben Sie versucht, sich die zu merkenden Wörter aktiv zu merken?", "Haben Sie versucht, die zu vergessenden Wörter absichtlich zu vergessen?", "Haben Sie während der Lernphase Notizen gemacht (z. B. auf Papier oder am PC)?", "Haben Sie an diesem Experiment ernsthaft und konzentriert teilgenommen?"];
-            postQuestions.forEach(q => {
-                routines.push(() => { currentRoutine = new ResponsiveScreen(q, isMobile ? "" : "[F] = NEIN       [J] = JA", ['f', 'j'], (key, rt) => { compiledData.push({ section: 'post_question', question: q, response: key==='f'?'Nein':'Ja', rt: rt }); nextRoutine(); }, false, "center", "binary-post"); currentRoutine.draw(); });
-            });
-            
-            routines.push(() => {
-                // Führt die automatische Google-Forms Übermittlung aus
-                sendeAnGoogleForms();
-
-                currentRoutine = { draw: () => {
-                    ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#000000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                    let baseSize = Math.max(canvas.width, canvas.height); let endSize = isMobile ? Math.round(baseSize * 0.011 * 1.6) : Math.round(baseSize * 0.011);
-                    ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Vielen Dank für Ihre Teilnahme!", canvas.width/2, canvas.height/2 - 70);
-                    ctx.font = endSize + "px Arial"; ctx.fillText("Ihre Daten wurden im Hintergrund gespeichert! Sie können das Fenster nun schließen..", canvas.width/2, canvas.height/2 - 30); 
-                    
-                    ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Ihr SurveyCircle-Freischaltcode lautet:", canvas.width/2, canvas.height/2 + 50);
-                    ctx.fillStyle = "#8B0000"; ctx.fillText("XXXX-XXXX-XXXX", canvas.width/2, canvas.height/2 + 90); 
-                    
-                }, handleKey: () => {} }; currentRoutine.draw();
-            });
-            executeRoutineIndex(0);
-        }
-
-        let currentIdx = 0; function executeRoutineIndex(idx) { currentIdx = idx; if(idx < routines.length) routines[idx](); } function nextRoutine() { executeRoutineIndex(currentIdx + 1); }
-        window.addEventListener('keydown', (e) => { if(currentRoutine && currentRoutine.handleKey) currentRoutine.handleKey(e.key.toLowerCase()); });
-
-        function runDistractorGame() {
-            let gameEndTime = performance.now() + 60000;
-            function spawnTrial() {
-                if(performance.now() >= gameEndTime) { nextRoutine(); return; }
-                let isGo = Math.random() < 0.7; let color = isGo ? "#006400" : "#8B0000"; let responded = false; let tStart = performance.now(); let size = Math.min(canvas.width, canvas.height) * 0.20; 
-                if (isMobile) { canvas.onclick = () => { if(!responded) { responded = true; let rt = (performance.now() - tStart) / 1000; compiledData.push({ section: 'distractor', type: isGo?'Go':'NoGo', result: isGo?'Hit':'False Alarm', rt: rt }); } }; }
-                currentRoutine = {
-                    draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = color; ctx.fillRect(canvas.width/2 - size/2, canvas.height/2 - size/2, size, size); },
-                    handleKey: (key) => { if(key === ' ' && !responded) { responded = true; let rt = (performance.now() - tStart) / 1000; compiledData.push({ section: 'distractor', type: isGo?'Go':'NoGo', result: isGo?'Hit':'False Alarm', rt: rt }); } }
-                }; currentRoutine.draw();
-                setTimeout(() => { canvas.onclick = null; if(!responded) { compiledData.push({ section: 'distractor', type: isGo?'Go':'NoGo', result: isGo?'Miss':'Correct Rejection', rt: -1 }); } ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); setTimeout(spawnTrial, 500 + Math.random()*500); }, 1200);
-            }
-            spawnTrial();
-        }
-
-        function convertToCSV() {
-            let csv = "participant,alter,geschlecht,beruf,section,word,true_type,ref,cue,question,response,correct,rt\n";
-            compiledData.forEach(d => { csv += `"${expInfo.participant}","${expInfo.Alter}","${expInfo.Geschlecht}","${expInfo.Beruf}","${d.section || ''}","${d.word || ''}","${d.true_type || ''}","${d.ref || ''}","${d.cue || ''}","${d.question || ''}","${d.response || ''}","${d.correct !== undefined ? d.correct : ''}","${d.rt}"\n`; });
-            return csv;
-        }
-
-        // DOPPEL-SICHERUNG METHOEDEN
-        function sendeAnGoogleForms() {
-            const csvContent = convertToCSV();
+            // 1. Die offizielle Google-Antwort-Adresse deines Formulars
             const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeZ1NznFFpSuDPR_aZvufLztVFyFKy2DRIAQPgAux3tAevi1Q/formResponse";
-            const formData = new FormData();
-            formData.append("entry.1396409330", csvContent);
+            
+            // 2. Wir verpacken die CSV-Daten direkt als URL-Parameter
+            const targetUrl = `${formUrl}?entry.1396409330=${encodeURIComponent(simulierteCSV)}`;
 
-            fetch(formUrl, {
-                method: "POST",
-                mode: "no-cors",
-                body: formData
-            })
-            .then(() => console.log("Erfolgreich an Google Forms übermittelt."))
-            .catch(err => console.error("Fehler bei Google Forms Übertragung:", err));
-        }
-
+            // 3. Wir erstellen ein unsichtbares Iframe-Element im Hintergrund
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = targetUrl;
+            
+            // 4. Das Iframe in die Seite einfügen (löst das Senden an Google aus)
+            document.body.appendChild(iframe);
+            
+            // 5. Nach einer kurzen Verzögerung das Iframe wieder aufräumen
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+                status.style.color = "green";
+                status.innerText = "✅ Abgeschickt! Schließe diesen Tab, öffne dein Google Formular und prüfe das Tab 'Antworten'.";
+                console.log("Erfolgreich via Iframe-Pipeline übermittelt.");
+            }, 2000);
+        });
     </script>
 </body>
 </html>
