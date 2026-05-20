@@ -152,6 +152,12 @@
                 section: 'device_info', 
                 true_type: isMobile ? 'Mobilgerät (Smartphone/Tablet)' : 'Computer/Laptop' 
             });
+
+ 	   // NEU: Speichert, ob Leon oder Leonie gewürfelt wurde
+           compiledData.push({ 
+              section: 'fremd_name_condition', 
+              true_type: fremdName 
+            });
             
             document.getElementById('form-overlay').style.display = 'none'; document.getElementById('canvas-container').style.display = 'flex';
             resizeCanvas(); startExperiment();
