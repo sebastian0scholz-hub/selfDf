@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SRE Directed Forgetting Experiment</title>
+    <title>SRE Experiment</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #7F7F7F; font-family: Arial, sans-serif; }
@@ -217,7 +217,7 @@
         // ENTWICKLUNG DER EXPERIMENT-ROUTINEN
         let routines = [];
         function startExperiment() {
-            routines.push(() => { currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten. Wenn Sie sich unwohl fühlen können Sie jederzeit ohne Angabe von Gründen das Fenster schließen. Ihre Daten werden anonymisiert gespeichert und dienen nur Forschungszwecken.\n\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
+            routines.push(() => { currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten.\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.\n\nWenn Sie sich unwohl fühlen können Sie jederzeit ohne Angabe von Gründen das Fenster schließen.\nIhre Daten werden anonymisiert gespeichert und dienen nur Forschungszwecken.\n\nKontakt:\nDr. Sebastian Scholz\nsebastian0scholz@gmail.com", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
             routines.push(() => { currentRoutine = new ResponsiveScreen("Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die angezeigten Buttons zum Antworten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
             
             const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich habe nicht viel, worauf ich stolz sein könnte.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
@@ -226,7 +226,7 @@
             });
 
             routines.push(() => {
-                let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert. Sie sollen diese entweder auf sich selbst beziehen oder auf eine Ihnen unbekannte Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition.\n\nNach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt.`;
+                let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert.\nSie sollen diese Wörter entweder auf sich selbst beziehen oder auf eine Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition!\n\nNach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt. Versuchen Sie sich also diese Wörter zu merken!`;
                 currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); currentRoutine.draw();
             });
             
@@ -253,7 +253,7 @@
                 currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], runDistractorGame); currentRoutine.draw(); 
             });
             routines.push(() => { 
-                let text = "Aufgabe 3\n\nEntscheiden Sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde oder aber neu ist. Dabei ist egal, ob Sie das Wort merken oder vergessen sollten oder ob es Sie oder die andere Person betraf.";
+                let text = "Aufgabe 3\n\nNun folgt der Gedächtnistest!\nEntscheiden Sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde (alt ist) oder aber neu ist. Dabei ist egal, ob Sie das Wort merken oder vergessen sollten und ob es Sie oder die andere Person betraf.";
                 currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); currentRoutine.draw(); 
             });
             testItems.forEach(item => {
