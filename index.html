@@ -217,7 +217,7 @@
         // ENTWICKLUNG DER EXPERIMENT-ROUTINEN
         let routines = [];
         function startExperiment() {
-            routines.push(() => { currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten. Wenn Sie sich unwohl fühlen können Sie jederzeit ohne Angabe von Gründen das Fenster schließen.\n\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
+            routines.push(() => { currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten. Wenn Sie sich unwohl fühlen können Sie jederzeit ohne Angabe von Gründen das Fenster schließen. Ihre Daten werden anonymisiert gespeichert und dienen nur Forschungszwecken.\n\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
             routines.push(() => { currentRoutine = new ResponsiveScreen("Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die angezeigten Buttons zum Antworten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
             
             const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich habe nicht viel, worauf ich stolz sein könnte.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
@@ -286,7 +286,7 @@
                     ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#000000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
                     let baseSize = Math.max(canvas.width, canvas.height); let endSize = isMobile ? Math.round(baseSize * 0.011 * 1.6) : Math.round(baseSize * 0.011);
                     ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Vielen Dank für Ihre Teilnahme!", canvas.width/2, canvas.height/2 - 70);
-                    ctx.font = endSize + "px Arial"; ctx.fillText("Ihre Daten wurden im Hintergrund gespeichert! Sie können das Fenster nun schließen..", canvas.width/2, canvas.height/2 - 30); 
+                    ctx.font = endSize + "px Arial"; ctx.fillText("Ihre Daten wurden im Hintergrund gespeichert! Sie können das Fenster nun schließen.", canvas.width/2, canvas.height/2 - 30); 
                     
                     ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Ihr SurveyCircle-Freischaltcode lautet:", canvas.width/2, canvas.height/2 + 50);
                     ctx.fillStyle = "#8B0000"; ctx.fillText("XXXX-XXXX-XXXX", canvas.width/2, canvas.height/2 + 90); 
@@ -320,23 +320,44 @@
             return csv;
         }
 
-        // Iframe-Übermittlung (CORS-Bypass für GitHub Pages ohne Downloads)
+          // AKTUALISIERT: Unbegrenzte, CORS-sichere Datenübermittlung per Formular-POST
         function sendeAnGoogleForms() {
             const csvContent = convertToCSV();
-            const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeZ1NznFFpSuDPR_aZvufLztVFyFKy2DRIAQPgAux3tAevi1Q/formResponse";
-            const targetUrl = `${formUrl}?entry.1396409330=${encodeURIComponent(csvContent)}`;
-
+            
+            // 1. Wir erstellen das unsichtbare Sendeformular dynamisch im Hintergrund
+            const payloadForm = document.createElement('form');
+            payloadForm.action = "https://docs.google.com/forms/d/e/1FAIpQLSeZ1NznFFpSuDPR_aZvufLztVFyFKy2DRIAQPgAux3tAevi1Q/formResponse";
+            payloadForm.method = "POST";
+            payloadForm.target = "hidden_iframe_pipeline";
+            payloadForm.style.display = "none";
+            
+            // 2. Wir erstellen das versteckte Textfeld für deine ID
+            const hiddenField = document.createElement('input');
+            hiddenField.type = "hidden";
+            hiddenField.name = "entry.1396409330";
+            hiddenField.value = csvContent;
+            
+            // 3. Wir erstellen ein unsichtbares Iframe, damit die Seite am Ende nicht wegspringt
             const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = targetUrl;
+            iframe.name = "hidden_iframe_pipeline";
+            iframe.style.display = "none";
             
+            // 4. Alles in das Dokument einfügen und abschicken
+            payloadForm.appendChild(hiddenField);
             document.body.appendChild(iframe);
+            document.body.appendChild(payloadForm);
             
+            payloadForm.submit();
+            console.log("Riesiger Datensatz erfolgreich an Google Forms übertragen.");
+            
+            // 5. Nach dem Senden die unsichtbaren Elemente wieder sauber aufräumen
             setTimeout(() => {
+                document.body.removeChild(payloadForm);
                 document.body.removeChild(iframe);
-                console.log("Erfolgreich über Iframe-Pipeline übermittelt.");
-            }, 1500);
+            }, 2000);
         }
     </script>
 </body>
+</html>
+
 </html>
