@@ -292,7 +292,7 @@
                     ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#000000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
                     let baseSize = Math.max(canvas.width, canvas.height); let endSize = isMobile ? Math.round(baseSize * 0.011 * 1.6) : Math.round(baseSize * 0.011);
                     ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Vielen Dank für Ihre Teilnahme!", canvas.width/2, canvas.height/2 - 70);
-                    ctx.font = endSize + "px Arial"; ctx.fillText("Ihre Daten wurden im Hintergrund gespeichert! Sie können das Fenster nun schließen.", canvas.width/2, canvas.height/2 - 30); 
+                    ctx.font = endSize + "px Arial"; ctx.fillText("Ihre Daten wurden im Hintergrund gespeichert! Sie können das Fenster nun schließen.\n\nKontakt:\nDr. Sebastian Scholz\nsebastian0scholz@gmail.com", canvas.width/2, canvas.height/2 - 30); 
                     
                     ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Ihr SurveyCircle-Freischaltcode lautet:", canvas.width/2, canvas.height/2 + 50);
                     ctx.fillStyle = "#8B0000"; ctx.fillText("XXXX-XXXX-XXXX", canvas.width/2, canvas.height/2 + 90); 
