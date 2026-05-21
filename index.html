@@ -57,7 +57,7 @@
                 <label for="input-beruf">Beruf / Studiengang:</label>
                 <input type="text" id="input-beruf">
             </div>
-            <button id="start-btn">Experiment starten</button>
+            <button id="start-btn" type="button">Experiment starten</button>
         </div>
     </div>
 
@@ -79,6 +79,7 @@
             <button id="btn-4" class="mobile-btn num-btn">4</button>
         </div>
     </div>
+
     <script>
         // GLOBALE VARIABLEN & EXPERIMENT-DATEN
         let expName = 'SRE_DirectedForgetting';
@@ -88,7 +89,7 @@
 
         const canvas = document.getElementById('experiment-canvas'); const ctx = canvas.getContext('2d');
         function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; if(currentRoutine) currentRoutine.draw(); }
-        window.addEventListener('resize', resizeCanvas); window.addEventListener('orientationchange', () => { setTimeout(resizeCanvas, 200); }); resizeCanvas();
+        window.addEventListener('resize', resizeCanvas); window.addEventListener('orientationchange', () => { setTimeout(resizeCanvas, 400); }); resizeCanvas();
 
         function wrapText(text, x, y, maxWidth, lineHeight, align = "center") {
             let words = text.split(' '); let line = ''; let lines = [];
@@ -97,7 +98,7 @@
                     let parts = words[n].split('\n');
                     for (let i = 0; i < parts.length; i++) {
                         let testLine = line + parts[i] + ' '; let metrics = ctx.measureText(testLine);
-                        if (metrics.width > maxWidth && n > 0) { lines.push(line); line = parts[i] + ' '; } else { line = testLine; }
+                        if (metrics.width > maxWidth) { lines.push(line); line = parts[i] + ' '; } else { line = testLine; }
                         if (i < parts.length - 1) { lines.push(line); line = ''; }
                     }
                 } else {
@@ -112,54 +113,107 @@
             return totalHeight;
         }
 
-        // WORTPOOLS & RANDOMISIERUNG
-        const posPool = ["pünktlich", "ehrlich", "kreativ", "mutig", "treu", "klug", "höflich", "fair", "aktiv", "warm", "stark", "ruhig", "weise", "froh", "offen", "witzig", "sanft", "heiter", "stolz", "flexibel", "charmant", "fokussiert", "geduldig", "gütig", "heldenhaft", "genial", "herzlich", "tolerant", "vital", "loyal", "achtsam", "fleißig", "reif", "sicher", "optimistisch", "dynamisch", "edel", "geschickt", "logisch", "munter", "aufgeweckt", "bescheiden", "diszipliniert", "eloquent", "empathisch", "fürsorglich", "humorvoll", "innovativ", "kompetent", "lebensfroh", "liebenswürdig", "motiviert", "produktiv", "zuverlässig", "selbstbewusst", "sorgfältig", "spontan", "tapfer", "umsichtig", "zielstrebig", "authentisch", "begeistert", "besonnen", "diplomatisch", "einfühlsam", "engagiert", "friedlich", "großzügig", "hilfbereit", "höflich", "inspirierend", "liebenswert", "mitfühlend", "organisiert", "respektvoll", "souverän", "tatkräftig", "verständnisvoll", "visionär", "warmherzig"];
+        // WORTPOOLS (Tippfehler & Duplikate korrigiert)
+        const posPool = ["pünktlich", "ehrlich", "kreativ", "mutig", "treu", "klug", "höflich", "fair", "aktiv", "warm", "stark", "ruhig", "weise", "froh", "offen", "witzig", "sanft", "heiter", "stolz", "flexibel", "charmant", "fokussiert", "geduldig", "gütig", "heldenhaft", "genial", "herzlich", "tolerant", "vital", "loyal", "achtsam", "fleißig", "reif", "sicher", "optimistisch", "dynamisch", "edel", "geschickt", "logisch", "munter", "aufgeweckt", "bescheiden", "diszipliniert", "eloquent", "empathisch", "fürsorglich", "humorvoll", "innovativ", "kompetent", "lebensfroh", "liebenswürdig", "motiviert", "produktiv", "zuverlässig", "selbstbewusst", "sorgfältig", "spontan", "tapfer", "umsichtig", "zielstrebig", "authentisch", "begeistert", "besonnen", "diplomatisch", "einfühlsam", "engagiert", "friedlich", "großzügig", "hilfsbereit", "inspirierend", "liebenswert", "mitfühlend", "organisiert", "respektvoll", "souverän", "tatkräftig", "verständnisvoll", "visionär", "warmherzig"];
         const negPool = ["faul", "gierig", "feige", "neidisch", "stur", "zornig", "frech", "kalt", "träge", "lax", "grob", "starr", "naiv", "böse", "scheu", "wirr", "hart", "falsch", "sauer", "arrogant", "chaotisch", "egoistisch", "geizig", "hinterlistig", "ignorant", "kleinlich", "launisch", "rachsüchtig", "unhöflich", "ängstlich", "bitter", "dreist", "eitel", "herzlos", "intolerant", "kritisch", "nachlässig", "oberflächlich", "passiv", "reizbar", "schadenfroh", "skeptisch", "taktlos", "überheblich", "ungeduldig", "unzuverlässig", "verbittert", "vorlaut", "zäh", "aggressiv", "bequem", "dominant", "eingebildet", "frustriert", "gleichgültig", "heuchlerisch", "kompliziert", "misstrauisch", "nachgiebig", "neurotisch", "pedantisch", "pessimistisch", "rücksichtslos", "schüchtern", "streitsüchtig", "unentschlossen", "unorganisiert", "unzufrieden", "verlogen", "verschlossen", "vorsichtig", "wankelmütig", "wehleidig", "wortkarg", "zynisch", "wütend", "verbissen"];
-        posPool.sort(() => Math.random() - 0.5); negPool.sort(() => Math.random() - 0.5);
+        // Echter Fisher-Yates Shuffle für mathematisch valide Verteilung
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
-        let learnPos = posPool.slice(0, 40); let testDistPos = posPool.slice(40);
-        let learnNeg = negPool.slice(0, 40); let testDistNeg = negPool.slice(40);
+        shuffle(posPool); 
+        shuffle(negPool);
+
+        // Exakte Verteilung: 40 Wörter für die Lernphase, 40 neue als Distraktoren für den Test
+        let learnPos = posPool.slice(0, 40); let testDistPos = posPool.slice(40, 80);
+        let learnNeg = negPool.slice(0, 40); let testDistNeg = negPool.slice(40, 80);
+
         let fremdName = Math.random() < 0.5 ? "Leon" : "Leonie";
         let beschreibungFremd = `${fremdName} ist 24 Jahre alt, studiert Wirtschaftswissenschaften in einer deutschen Großstadt, treibt gerne Sport und trifft sich oft mit Freunden.`;
 
         let learningItems = [];
+        // Cues exakt balancieren (50% MERKEN / 50% VERGESSEN pro Bedingungs-Block)
         function addItems(list, count, ref, prompt) {
+            let cues = [];
+            for (let i = 0; i < count; i++) { cues.push(i < count / 2 ? "MERKEN" : "VERGESSEN"); }
+            shuffle(cues);
+
             for (let i = 0; i < count; i++) {
                 let w = list.pop();
-                learningItems.push({ word: w, ref: ref, prompt: prompt, cue: (i % 2 === 0) ? "MERKEN" : "VERGESSEN", type: 'old' });
+                learningItems.push({ word: w, ref: ref, prompt: prompt, cue: cues[i], type: 'old' });
             }
         }
+
         addItems(learnPos, 20, "self", "Beschreibt dieses Wort DICH?");
         addItems(learnNeg, 20, "self", "Beschreibt dieses Wort DICH?");
         addItems(learnPos, 20, "other", `Beschreibt dieses Wort ${fremdName}?`);
         addItems(learnNeg, 20, "other", `Beschreibt dieses Wort ${fremdName}?`);
-        learningItems.sort(() => Math.random() - 0.5);
+
+        // Funktion zur Durchsetzung der Streak-Regel (Maximal 3x hintereinander gleich)
+        function enforceMaxStreak(array) {
+            let iterations = 0;
+            let restart = true;
+
+            while (restart && iterations < 100) {
+                restart = false;
+                iterations++;
+                
+                for (let i = 3; i < array.length; i++) {
+                    let badCue = (array[i].cue === array[i-1].cue && array[i].cue === array[i-2].cue && array[i].cue === array[i-3].cue);
+                    let badRef = (array[i].ref === array[i-1].ref && array[i].ref === array[i-2].ref && array[i].ref === array[i-3].ref);
+                    
+                    if (badCue || badRef) {
+                        for (let j = i + 1; j < array.length; j++) {
+                            let temp = array[i]; array[i] = array[j]; array[j] = temp;
+                            
+                            let checkCue = (array[i].cue === array[i-1].cue && array[i].cue === array[i-2].cue && array[i].cue === array[i-3].cue);
+                            let checkRef = (array[i].ref === array[i-1].ref && array[i].ref === array[i-2].ref && array[i].ref === array[i-3].ref);
+                            
+                            if (!checkCue && !checkRef) {
+                                restart = true;
+                                break;
+                            }
+                            array[j] = array[i]; array[i] = temp;
+                        }
+                        if (restart) break;
+                    }
+                }
+            }
+            return array;
+        }
+
+        shuffle(learningItems);
+        learningItems = enforceMaxStreak(learningItems);
 
         let testItems = [...learningItems];
         testDistPos.forEach(w => testItems.push({ word: w, type: 'new', ref: 'none', cue: 'none' }));
         testDistNeg.forEach(w => testItems.push({ word: w, type: 'new', ref: 'none', cue: 'none' }));
-        testItems.sort(() => Math.random() - 0.5);
+        shuffle(testItems);
+
         // EVENT-LISTENER FÜR DEN START-BUTTON
         document.getElementById('start-btn').addEventListener('click', () => {
-            const alter = document.getElementById('input-alter').value; const geschlecht = document.getElementById('select-geschlecht').value; const beruf = document.getElementById('input-beruf').value;
-            if (!alter || geschlecht === "Auswahl" || !beruf) { document.getElementById('error-msg').style.display = "block"; return; }
+            const alter = document.getElementById('input-alter').value; 
+            const geschlecht = document.getElementById('select-geschlecht').value; 
+            const beruf = document.getElementById('input-beruf').value;
+            
+            if (!alter || geschlecht === "Auswahl" || !beruf) { 
+                document.getElementById('error-msg').style.display = "block"; 
+                return; 
+            }
+            
             const urlParams = new URLSearchParams(window.location.search);
             expInfo.participant = urlParams.get('participant') || "web_" + Math.floor(Math.random()*100000);
             expInfo.Alter = alter; expInfo.Geschlecht = geschlecht; expInfo.Beruf = beruf;
             
-            // Speichert den Gerätetyp direkt als ersten Eintrag in den Daten
-            compiledData.push({ 
-                section: 'device_info', 
-                true_type: isMobile ? 'Mobilgerät (Smartphone/Tablet)' : 'Computer/Laptop' 
-            });
-
- 	   // NEU: Speichert, ob Leon oder Leonie gewürfelt wurde
-           compiledData.push({ 
-              section: 'fremd_name_condition', 
-              true_type: fremdName 
-            });
+            compiledData.push({ section: 'device_info', true_type: isMobile ? 'Mobilgerät (Smartphone/Tablet)' : 'Computer/Laptop' });
+            compiledData.push({ section: 'fremd_name_condition', true_type: fremdName });
             
-            document.getElementById('form-overlay').style.display = 'none'; document.getElementById('canvas-container').style.display = 'flex';
+            document.getElementById('form-overlay').style.display = 'none'; 
+            document.getElementById('canvas-container').style.display = 'flex';
             resizeCanvas(); startExperiment();
         });
 
@@ -172,191 +226,406 @@
                 this.setupMobileControls();
             }
             setupMobileControls() {
-                const binButtons = document.getElementById('mobile-binary-buttons'); const numButtons = document.getElementById('mobile-number-buttons');
-                const bLeft = document.getElementById('btn-left'); const bRight = document.getElementById('btn-right');
+                const binButtons = document.getElementById('mobile-binary-buttons'); 
+                const numButtons = document.getElementById('mobile-number-buttons');
+                const bLeft = document.getElementById('btn-left'); 
+                const bRight = document.getElementById('btn-right');
+                
+                const setTouchAction = (element, key) => {
+                    element.onclick = (e) => { e.preventDefault(); this.handleKey(key); };
+                    element.ontouchstart = (e) => { e.preventDefault(); this.handleKey(key); };
+                };
+
                 if (isMobile && this.buttonType === "binary-learn") {
                     binButtons.style.display = 'flex'; numButtons.style.display = 'none';
                     bLeft.innerHTML = "NEIN"; bRight.innerHTML = "JA";
-                    bLeft.onclick = () => this.handleKey('f'); bRight.onclick = () => this.handleKey('j');
+                    setTouchAction(bLeft, 'f'); setTouchAction(bRight, 'j');
                 } else if (isMobile && this.buttonType === "binary-test") {
                     binButtons.style.display = 'flex'; numButtons.style.display = 'none';
                     bLeft.innerHTML = "NEU"; bRight.innerHTML = "ALT";
-                    bLeft.onclick = () => this.handleKey('f'); bRight.onclick = () => this.handleKey('j');
+                    setTouchAction(bLeft, 'f'); setTouchAction(bRight, 'j');
                 } else if (isMobile && this.buttonType === "binary-post") {
                     binButtons.style.display = 'flex'; numButtons.style.display = 'none';
                     bLeft.innerHTML = "NEIN"; bRight.innerHTML = "JA";
-                    bLeft.onclick = () => this.handleKey('f'); bRight.onclick = () => this.handleKey('j');
+                    setTouchAction(bLeft, 'f'); setTouchAction(bRight, 'j');
                 } else if (isMobile && this.allowedKeys.includes('1')) {
                     binButtons.style.display = 'none'; numButtons.style.display = 'flex';
-                    document.getElementById('btn-1').onclick = () => this.handleKey('1'); document.getElementById('btn-2').onclick = () => this.handleKey('2');
-                    document.getElementById('btn-3').onclick = () => this.handleKey('3'); document.getElementById('btn-4').onclick = () => this.handleKey('4');
+                    for (let i = 1; i <= 4; i++) { setTouchAction(document.getElementById(`btn-${i}`), String(i)); }
                 } else {
                     binButtons.style.display = 'none'; numButtons.style.display = 'none';
-                    if (isMobile && this.allowedKeys.includes(' ')) { canvas.onclick = () => this.handleKey(' '); }
+                    if (isMobile && this.allowedKeys.includes(' ')) { 
+                        canvas.onclick = (e) => { e.preventDefault(); this.handleKey(' '); };
+                        canvas.ontouchstart = (e) => { e.preventDefault(); this.handleKey(' '); };
+                    }
                 }
             }
             draw() {
-                ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#000000"; ctx.textBaseline = "middle";
-                let baseSize = Math.max(canvas.width, canvas.height); let scaleFactor = isMobile ? 1.6 : 1.0;
-                let titleSize = this.isStimulus ? Math.round(baseSize * 0.025 * scaleFactor) : Math.round(baseSize * 0.013 * scaleFactor);
+                ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); 
+                ctx.fillStyle = "#000000"; ctx.textBaseline = "middle";
+                let baseWidth = canvas.width; let scaleFactor = isMobile ? 1.3 : 1.0;
+                let titleSize = this.isStimulus ? Math.round(baseWidth * 0.04 * scaleFactor) : Math.round(baseWidth * 0.025 * scaleFactor);
+                titleSize = Math.min(titleSize, isMobile ? 32 : 24);
                 
                 ctx.font = "bold " + titleSize + "px Arial"; let maxWidth = canvas.width * 0.90;
-                let titleY = isMobile ? canvas.height * 0.35 : (this.sub ? canvas.height * 0.28 : canvas.height * 0.50);
+                let titleY = isMobile ? canvas.height * 0.35 : (this.sub ? canvas.height * 0.35 : canvas.height * 0.50);
                 wrapText(this.title, canvas.width / 2, titleY, maxWidth, titleSize * 1.3, "center");
                 
                 if (this.sub) {
-                    let subSize = this.isStimulus ? Math.round(baseSize * 0.028 * scaleFactor) : titleSize;
+                    let subSize = this.isStimulus ? Math.round(baseWidth * 0.045 * scaleFactor) : titleSize;
+                    subSize = Math.min(subSize, isMobile ? 28 : 22);
                     ctx.font = "bold " + subSize + "px Arial";
-                    let subY = isMobile ? canvas.height * 0.58 : canvas.height * 0.70; 
-                    let subX = this.alignSub === "left" && !isMobile ? canvas.width / 2 - 80 : canvas.width / 2;
+                    let subY = isMobile ? canvas.height * 0.60 : canvas.height * 0.65; 
+                    let subX = this.alignSub === "left" && !isMobile ? canvas.width * 0.40 : canvas.width / 2;
                     wrapText(this.sub, subX, subY, maxWidth, subSize * 1.4, isMobile ? "center" : this.alignSub);
                 }
             }
             handleKey(key) {
                 if (!this.active || !this.allowedKeys.includes(key)) return;
-                this.active = false; canvas.onclick = null;
-                document.getElementById('mobile-binary-buttons').style.display = 'none'; document.getElementById('mobile-number-buttons').style.display = 'none';
+                this.active = false; canvas.onclick = null; canvas.ontouchstart = null;
+                document.querySelectorAll('.mobile-btn').forEach(btn => { btn.onclick = null; btn.ontouchstart = null; });
+                document.getElementById('mobile-binary-buttons').style.display = 'none'; 
+                document.getElementById('mobile-number-buttons').style.display = 'none';
                 let rt = (performance.now() - this.startTime) / 1000; this.callback(key, rt);
             }
         }
-
         // ENTWICKLUNG DER EXPERIMENT-ROUTINEN
         let routines = [];
         function startExperiment() {
-            routines.push(() => { currentRoutine = new ResponsiveScreen("Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten.\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.\n\nWenn Sie sich unwohl fühlen können Sie jederzeit ohne Angabe von Gründen das Fenster schließen.\nIhre Daten werden anonymisiert gespeichert und dienen nur Forschungszwecken.\n\nKontakt:\nDr. Sebastian Scholz\nsebastian0scholz@gmail.com", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
-            routines.push(() => { currentRoutine = new ResponsiveScreen("Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die angezeigten Buttons zum Antworten.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
-            
-            const rosenbergItems = ["Alles in allem bin ich mit mir selbst zufrieden.", "Alles in allem neige ich dazu, mich als Versager zu betrachten.", "Ich glaube, ich habe einen Haufen guter Eigenschaften.", "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", "Ich glaube, ich habe nicht viel, worauf ich stolz sein könnte.", "Dienlich und nützlich fühl ich mich hin und wieder gewiss nicht.", "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", "Ich habe eine positive Einstellung zu mir selbst."];
-            rosenbergItems.forEach(item => {
-                routines.push(() => { currentRoutine = new ResponsiveScreen(item, isMobile ? "" : "1 = Trifft gar nicht zu\n2 = Trifft eher nicht zu\n3 = Trifft eher zu\n4 = Trifft voll zu", ['1','2','3','4'], (key, rt) => { compiledData.push({ section: 'rosenberg', item: item, response: key, rt: rt }); nextRoutine(); }, false, "left"); currentRoutine.draw(); });
+            // 1. Willkommen
+            routines.push(() => { 
+                currentRoutine = new ResponsiveScreen(
+                    "Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten.\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.\n\nEine Teilnahme ist freiwillig. Wenn Sie sich unwohl fühlen, können Sie jederzeit ohne Angabe von Gründen das Fenster schließen.\nIhre Daten werden anonymisiert gespeichert und dienen nur Forschungszwecken.\n\nKontakt:\nDr. Sebastian Scholz\nsebastian0scholz@gmail.com", 
+                    isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", 
+                    [' '], nextRoutine
+                ); 
+                currentRoutine.draw(); 
             });
 
-            routines.push(() => {
-                let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert.\nSie sollen diese Wörter entweder auf sich selbst beziehen oder auf eine Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition!\n\nNach der Einschätzung folgt die Anweisung das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt. Versuchen Sie sich also diese Wörter zu merken!`;
-                currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); currentRoutine.draw();
+            // 2. Ankündigung Demografie/Persönlichkeit
+            routines.push(() => { 
+                currentRoutine = new ResponsiveScreen(
+                    "Es folgen einige Fragen zu Ihrer Person.\nBitte nutzen Sie die angezeigten Buttons zum Antworten.", 
+                    isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", 
+                    [' '], nextRoutine
+                ); 
+                currentRoutine.draw(); 
             });
             
-            learningItems.forEach(item => {
-                routines.push(() => {
-                    let baseSize = Math.max(canvas.width, canvas.height); let fixSize = isMobile ? Math.round(baseSize*0.0275*1.6) : Math.round(baseSize*0.0275);
-                    currentRoutine = { draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#000000"; ctx.font = "bold " + fixSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); }, handleKey: () => {} }; currentRoutine.draw();
-                    setTimeout(() => {
-                        let pcPrompt = "\n\n[F] = NEIN    [J] = JA";
-                        currentRoutine = new ResponsiveScreen(item.prompt, isMobile ? item.word.toUpperCase() : item.word.toUpperCase() + pcPrompt, ['f', 'j'], (key, rt) => {
-                            compiledData.push({ section: 'learning', word: item.word, ref: item.ref, cue: item.cue, response: key === 'f'?'Nein':'Ja', rt: rt });
-                            currentRoutine = { draw: () => {
-                                ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = item.cue === "MERKEN" ? "#006400" : "#8B0000"; 
-                                let cueSize = isMobile ? Math.round(Math.max(canvas.width, canvas.height)*0.025*1.6) : Math.round(Math.max(canvas.width, canvas.height)*0.025);
-                                ctx.font = "bold " + cueSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText(item.cue, canvas.width/2, canvas.height/2);
-                            }, handleKey: () => {} }; currentRoutine.draw();
-                            setTimeout(nextRoutine, 1500); 
-                        }, true, "center", "binary-learn"); currentRoutine.draw();
-                    }, 500);
+            // 3. Rosenberg Items (Jetzt mit vollständiger mobiler Beschriftung!)
+            const rosenbergItems = [
+                "Alles in allem bin ich mit mir selbst zufrieden.", 
+                "Alles in allem neige ich dazu, mich als Versager zu betrachten.", 
+                "Ich glaube, ich habe einen Haufen guter Eigenschaften.", 
+                "Ich kann Dinge genauso gut wie die meisten anderen Menschen.", 
+                "Ich glaube, ich habe nicht viel, worauf ich stolz sein könnte.", 
+                "Ich fühle mich von Zeit zu Zeit nutzlos.", 
+                "Ich glaube, ich bin ein wertvoller Mensch, zumindest nicht weniger als andere.", 
+                "Ich wünschte, ich könnte mehr Respekt vor mir selbst haben.", 
+                "Alles in allem bin ich eher geneigt, mich als Fehlschlag zu betrachten.", 
+                "Ich habe eine positive Einstellung zu mir selbst."
+            ];
+            
+            rosenbergItems.forEach(item => {
+                routines.push(() => { 
+                    currentRoutine = new ResponsiveScreen(
+                        item, 
+                        "1 = Trifft gar nicht zu   2 = Trifft eher nicht zu\n3 = Trifft eher zu   4 = Trifft voll zu", 
+                        ['1','2','3','4'], 
+                        (key, rt) => { 
+                            compiledData.push({ section: 'rosenberg', item: item, response: key, rt: rt }); 
+                            nextRoutine(); 
+                        }, 
+                        false, "center"
+                    ); 
+                    currentRoutine.draw(); 
                 });
             });
+
+            // 4. Instruktion Hauptteil
+            routines.push(() => {
+                let text = `Im folgenden Hauptteil werden Ihnen Wörter präsentiert.\nSie sollen diese Wörter entweder auf sich selbst beziehen oder auf eine Person namens ${fremdName}.\n\nZur Person: ${beschreibungFremd}\n\nVerlassen Sie sich bei der Beurteilung bitte ganz auf Ihre Intuition!\n\nNach der Einschätzung folgt die Anweisung, das Wort zu merken oder zu vergessen. Nur Wörter, die gemerkt werden sollen, werden später in einem Test abgefragt. Versuchen Sie sich also, diese Wörter zu merken!`;
+                currentRoutine = new ResponsiveScreen(
+                    text, 
+                    isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", 
+                    [' '], nextRoutine
+                ); 
+                currentRoutine.draw();
+            });
+            
+            // 5. Lernphase
+            learningItems.forEach(item => {
+                routines.push(() => {
+                    currentRoutine = { 
+                        draw: () => { 
+                            ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); 
+                            ctx.fillStyle = "#000000"; ctx.font = "bold " + (isMobile ? "40px" : "30px") + " Arial"; 
+                            ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); 
+                        }, 
+                        handleKey: () => {} 
+                    }; 
+                    currentRoutine.draw();
+                    setTimeout(nextRoutine, 500);
+                });
+
+                routines.push(() => {
+                    let pcPrompt = "\n\n[F] = NEIN    [J] = JA";
+                    currentRoutine = new ResponsiveScreen(
+                        item.prompt, 
+                        isMobile ? item.word.toUpperCase() : item.word.toUpperCase() + pcPrompt, 
+                        ['f', 'j'], 
+                        (key, rt) => {
+                            compiledData.push({ section: 'learning', word: item.word, ref: item.ref, cue: item.cue, response: key === 'f'?'Nein':'Ja', rt: rt });
+                            nextRoutine();
+                        }, 
+                        true, "center", "binary-learn"
+                    ); 
+                    currentRoutine.draw();
+                });
+
+                routines.push(() => {
+                    currentRoutine = { 
+                        draw: () => {
+                            ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); 
+                            ctx.fillStyle = item.cue === "MERKEN" ? "#006400" : "#8B0000"; 
+                            ctx.font = "bold " + (isMobile ? "36px" : "28px") + " Arial"; 
+                            ctx.textAlign = "center"; ctx.fillText(item.cue, canvas.width/2, canvas.height/2);
+                        }, 
+                        handleKey: () => {} 
+                    }; 
+                    currentRoutine.draw();
+                    setTimeout(nextRoutine, 1500);
+                });
+            });
+
+            // 6. Distraktor-Instruktion
             routines.push(() => { 
                 let text = "Aufgabe 2 (Dauer: 60 Sekunden):\n\nEs erscheint gleich ein Quadrat in der Bildschirmmitte.\n\nWenn das Quadrat GRÜN wird -> " + (isMobile ? "Auf den Bildschirm tippen!" : "LEERTASTE drücken!") + "\nWenn das Quadrat ROT wird -> Machen Sie NICHTS!";
-                currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], runDistractorGame); currentRoutine.draw(); 
+                currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], runDistractorGame); 
+                currentRoutine.draw(); 
             });
+
+            // 7. Test-Instruktion
             routines.push(() => { 
                 let text = "Aufgabe 3\n\nNun folgt der Gedächtnistest!\nEntscheiden Sie so schnell wie möglich, ob ein Wort am Anfang präsentiert wurde (alt ist) oder aber neu ist. Dabei ist egal, ob Sie das Wort merken oder vergessen sollten und ob es Sie oder die andere Person betraf.";
-                currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); currentRoutine.draw(); 
+                currentRoutine = new ResponsiveScreen(text, isMobile ? "[AUF DEN BILDSCHIRM TIPPEN ZUM STARTEN]" : "[LEERTASTE ZUM STARTEN]", [' '], nextRoutine); 
+                currentRoutine.draw(); 
             });
+
+            // 8. Testphase
             testItems.forEach(item => {
                 routines.push(() => {
-                    let baseSize = Math.max(canvas.width, canvas.height); let fixSize = isMobile ? Math.round(baseSize*0.0275*1.6) : Math.round(baseSize*0.0275);
-                    currentRoutine = { draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#000000"; ctx.font = "bold " + fixSize + "px Arial"; ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); }, handleKey: () => {} }; currentRoutine.draw();
-                    setTimeout(() => {
-                        currentRoutine = new ResponsiveScreen(item.word.toUpperCase(), isMobile ? "" : "[F] = NEU       [J] = ALT", ['f', 'j'], (key, rt) => {
+                    currentRoutine = { 
+                        draw: () => { 
+                            ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); 
+                            ctx.fillStyle = "#000000"; ctx.font = "bold " + (isMobile ? "40px" : "30px") + " Arial"; 
+                            ctx.textAlign = "center"; ctx.fillText("+", canvas.width/2, canvas.height/2); 
+                        }, 
+                        handleKey: () => {} 
+                    }; 
+                    currentRoutine.draw();
+                    setTimeout(nextRoutine, 500);
+                });
+
+                routines.push(() => {
+                    currentRoutine = new ResponsiveScreen(
+                        item.word.toUpperCase(), 
+                        isMobile ? "Bitte nutzen Sie die Knöpfe am unteren Bildschirmrand." : "[F] = NEU       [J] = ALT", 
+                        ['f', 'j'], 
+                        (key, rt) => {
                             let resp = key === 'f' ? 'new' : 'old';
                             compiledData.push({ section: 'test', word: item.word, true_type: item.type, ref: item.ref, cue: item.cue, response: resp, correct: resp === item.type ? 1:0, rt: rt });
                             nextRoutine();
-                        }, true, "center", "binary-test"); currentRoutine.draw();
-                    }, 500);
+                        }, 
+                        true, "center", "binary-test"
+                    ); 
+                    currentRoutine.draw();
                 });
             });
+            // 9. Post-Fragen Ankündigung
+            routines.push(() => { 
+                currentRoutine = new ResponsiveScreen(
+                    "Zum Abschluss bitten wir Sie noch um die Beantwortung von fünf kurzen Fragen.", 
+                    isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", 
+                    [' '], nextRoutine
+                ); 
+                currentRoutine.draw(); 
+            });
 
-            routines.push(() => { currentRoutine = new ResponsiveScreen("Zum Abschluss bitten wir Sie noch um die Beantwortung von fünf kurzen Fragen.", isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", [' '], nextRoutine); currentRoutine.draw(); });
-            const postQuestions = ["Haben Sie von der fremden Person ein konkretes Bild im Kopf gehabt?", "Haben Sie versucht, sich die zu merkenden Wörter aktiv zu merken?", "Haben Sie versucht, die zu vergessenden Wörter absichtlich zu vergessen?", "Haben Sie während der Lernphase Notizen gemacht (z. B. auf Papier oder am PC)?", "Haben Sie an diesem Experiment ernsthaft und konzentriert teilgenommen?"];
-            postQuestions.forEach(q => {
-                routines.push(() => { currentRoutine = new ResponsiveScreen(q, isMobile ? "" : "[F] = NEIN       [J] = JA", ['f', 'j'], (key, rt) => { compiledData.push({ section: 'post_question', question: q, response: key==='f'?'Nein':'Ja', rt: rt }); nextRoutine(); }, false, "center", "binary-post"); currentRoutine.draw(); });
+            // 10. Post-Fragen Items
+            const postQuestions = [
+                "Haben Sie von der fremden Person ein konkretes Bild im Kopf gehabt?", 
+                "Haben Sie versucht, sich die zu merkenden Wörter aktiv zu merken?", 
+                "Haben Sie versucht, die zu vergessenden Wörter absichtlich zu vergessen?", 
+                "Haben Sie während der Lernphase Notizen gemacht (z. B. auf Papier oder am PC)?", 
+                "Haben Sie an diesem Experiment ernsthaft und konzentriert teilgenommen?"
+            ];
+            
+            postQuestions.forEach((q, idx) => {
+                routines.push(() => { 
+                    currentRoutine = new ResponsiveScreen(
+                        q, 
+                        "[F] = NEIN                 [J] = JA", 
+                        ['f', 'j'], 
+                        (key, rt) => { 
+                            compiledData.push({ section: 'post', q_idx: idx, response: key === 'f' ? 'Nein' : 'Ja', rt: rt }); 
+                            nextRoutine(); 
+                        }, 
+                        false, "center", "binary-post"
+                    ); 
+                    currentRoutine.draw(); 
+                });
             });
             
+            // 11. Debriefing & Datenübertragung
             routines.push(() => {
-                // Führt die automatische Google-Forms Übermittlung um 1 Sekunde verzögert aus
                 setTimeout(() => {
                     sendeAnGoogleForms();
                 }, 1000);
 
-                currentRoutine = { draw: () => {
-                    ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#000000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                    let baseSize = Math.max(canvas.width, canvas.height); let endSize = isMobile ? Math.round(baseSize * 0.011 * 1.6) : Math.round(baseSize * 0.011);
-                    ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Vielen Dank für Ihre Teilnahme!", canvas.width/2, canvas.height/2 - 70);
-                    ctx.font = endSize + "px Arial"; ctx.fillText("Ihre Daten wurden im Hintergrund gespeichert! Sie können das Fenster nun schließen.\n\nKontakt:\nDr. Sebastian Scholz\nsebastian0scholz@gmail.com", canvas.width/2, canvas.height/2 - 30); 
-                    
-                    ctx.font = "bold " + endSize + "px Arial"; ctx.fillText("Ihr SurveyCircle-Freischaltcode lautet:", canvas.width/2, canvas.height/2 + 50);
-                    ctx.fillStyle = "#8B0000"; ctx.fillText("XXXX-XXXX-XXXX", canvas.width/2, canvas.height/2 + 90); 
-                    
-                }, handleKey: () => {} }; currentRoutine.draw();
+                currentRoutine = { 
+                    draw: () => {
+                        ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0, 0, canvas.width, canvas.height); 
+                        ctx.fillStyle = "#000000"; ctx.textBaseline = "middle";
+                        
+                        let baseWidth = canvas.width;
+                        let endSize = isMobile ? Math.round(baseWidth * 0.03) : 16;
+                        endSize = Math.min(endSize, 20);
+                        
+                        ctx.font = "bold " + (endSize + 4) + "px Arial"; 
+                        ctx.textAlign = "center";
+                        ctx.fillText("Vielen Dank für Ihre Teilnahme!", canvas.width / 2, canvas.height * 0.15);
+                        
+                        ctx.font = endSize + "px Arial";
+                        let debriefText = "In diesem Experiment soll der Einfluss des Selbstwerts auf das Erinnern und absichtliche Vergessen von Personenbeschreibungen untersucht werden. Die Hauptfrage ist, ob negative selbstwertbezogene Informationen einfacher vergessen werden können als andere Informationen.\n\nIhre Daten wurden im Hintergrund sicher gespeichert! Sie können das Fenster nun schließen.\n\nKontakt: Dr. Sebastian Scholz (sebastian0scholz@gmail.com)";
+                        wrapText(debriefText, canvas.width / 2, canvas.height * 0.50, canvas.width * 0.85, endSize * 1.4, "center");
+                        
+                        ctx.fillStyle = "#000000";
+                        ctx.font = "bold " + endSize + "px Arial"; 
+                        ctx.fillText("Ihr SurveyCircle-Freischaltcode lautet:", canvas.width / 2, canvas.height * 0.80);
+                        
+                        ctx.fillStyle = "#8B0000"; 
+                        ctx.font = "bold " + (endSize + 4) + "px Arial";
+                        ctx.fillText("XXXX-XXXX-XXXX", canvas.width / 2, canvas.height * 0.86); 
+                    }, 
+                    handleKey: () => {} 
+                }; 
+                currentRoutine.draw();
             });
+            
             executeRoutineIndex(0);
         }
 
-        let currentIdx = 0; function executeRoutineIndex(idx) { currentIdx = idx; if(idx < routines.length) routines[idx](); } function nextRoutine() { executeRoutineIndex(currentIdx + 1); }
-        window.addEventListener('keydown', (e) => { if(currentRoutine && currentRoutine.handleKey) currentRoutine.handleKey(e.key.toLowerCase()); });
+        let currentIdx = 0; 
+        function executeRoutineIndex(idx) { currentIdx = idx; if(idx < routines.length) routines[idx](); } 
+        function nextRoutine() { executeRoutineIndex(currentIdx + 1); }
+        
+        // Globaler Desktop-Tastatur-Handler (deaktiviert sich während des Distraktor-Spiels)
+        let globalKeydownHandler = (e) => { 
+            if (currentRoutine && typeof currentRoutine.handleKey === 'function') { 
+                currentRoutine.handleKey(e.key.toLowerCase()); 
+            } 
+        };
+        window.addEventListener('keydown', globalKeydownHandler);
 
+        // Stabilisiertes, mobilesicheres Distraktor-Spiel (Go/NoGo Task)
         function runDistractorGame() {
+            window.removeEventListener('keydown', globalKeydownHandler); // Verhindert Tastatur-Fehlzündungen
             let gameEndTime = performance.now() + 60000;
+            let isGo = false; let responded = false; let tStart = 0; let trialActive = false;
+            
+            const registerResponse = (e) => {
+                if (e) e.preventDefault();
+                if (!trialActive || responded) return;
+                responded = true;
+                let rt = (performance.now() - tStart) / 1000;
+                compiledData.push({ section: 'dist', type: isGo ? 'Go' : 'NoGo', res: isGo ? 'Hit' : 'FA', rt: rt });
+            };
+
+            if (isMobile) {
+                canvas.onclick = registerResponse; canvas.ontouchstart = registerResponse;
+            } else {
+                window.onkeydown = (e) => { if (e.key === ' ') registerResponse(e); };
+            }
+
             function spawnTrial() {
-                if(performance.now() >= gameEndTime) { nextRoutine(); return; }
-                let isGo = Math.random() < 0.7; let color = isGo ? "#006400" : "#8B0000"; let responded = false; let tStart = performance.now(); let size = Math.min(canvas.width, canvas.height) * 0.20; 
-                if (isMobile) { canvas.onclick = () => { if(!responded) { responded = true; let rt = (performance.now() - tStart) / 1000; compiledData.push({ section: 'distractor', type: isGo?'Go':'NoGo', result: isGo?'Hit':'False Alarm', rt: rt }); } }; }
+                if (performance.now() >= gameEndTime) { 
+                    canvas.onclick = null; canvas.ontouchstart = null; window.onkeydown = null;
+                    window.addEventListener('keydown', globalKeydownHandler); // Re-aktiviert Standardsteuerung
+                    nextRoutine(); 
+                    return; 
+                }
+                
+                isGo = Math.random() < 0.7; 
+                let color = isGo ? "#006400" : "#8B0000"; 
+                responded = false; trialActive = true; tStart = performance.now(); 
+                let size = Math.min(canvas.width, canvas.height) * 0.20; 
+                
                 currentRoutine = {
-                    draw: () => { ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = color; ctx.fillRect(canvas.width/2 - size/2, canvas.height/2 - size/2, size, size); },
-                    handleKey: (key) => { if(key === ' ' && !responded) { responded = true; let rt = (performance.now() - tStart) / 1000; compiledData.push({ section: 'distractor', type: isGo?'Go':'NoGo', result: isGo?'Hit':'False Alarm', rt: rt }); } }
-                }; currentRoutine.draw();
-                setTimeout(() => { canvas.onclick = null; if(!responded) { compiledData.push({ section: 'distractor', type: isGo?'Go':'NoGo', result: isGo?'Miss':'Correct Rejection', rt: -1 }); } ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); setTimeout(spawnTrial, 500 + Math.random()*500); }, 1200);
+                    draw: () => { 
+                        ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); 
+                        ctx.fillStyle = color; ctx.fillRect(canvas.width/2 - size/2, canvas.height/2 - size/2, size, size); 
+                    },
+                    handleKey: () => {}
+                }; 
+                currentRoutine.draw();
+                
+                setTimeout(() => {
+                    trialActive = false;
+                    if (!responded) { 
+                        compiledData.push({ section: 'dist', type: isGo ? 'Go' : 'NoGo', res: isGo ? 'Miss' : 'CR', rt: -1 }); 
+                    } 
+                    ctx.fillStyle = "#7F7F7F"; ctx.fillRect(0,0,canvas.width,canvas.height); 
+                    setTimeout(spawnTrial, 500 + Math.random() * 500); 
+                }, 1200);
             }
             spawnTrial();
         }
 
+        function safeStr(val) {
+            if (!val) return '';
+            return String(val).replace(/"/g, '""').trim();
+        }
+
+        // Komprimiertes CSV-Format, um das Google-Forms Zeichenlimit niemals zu sprengen
         function convertToCSV() {
-            let csv = "participant,alter,geschlecht,beruf,section,word,true_type,ref,cue,question,response,correct,rt\n";
-            compiledData.forEach(d => { csv += `"${expInfo.participant}","${expInfo.Alter}","${expInfo.Geschlecht}","${expInfo.Beruf}","${d.section || ''}","${d.word || ''}","${d.true_type || ''}","${d.ref || ''}","${d.cue || ''}","${d.question || ''}","${d.response || ''}","${d.correct !== undefined ? d.correct : ''}","${d.rt}"\n`; });
+            let csv = "p,a,g,b,s,w,t,r,c,q,idx,res,cor,rt\n";
+            let p = safeStr(expInfo.participant); let a = safeStr(expInfo.Alter);
+            let g = safeStr(expInfo.Geschlecht); let b = safeStr(expInfo.Beruf);
+            
+            compiledData.forEach(d => { 
+                csv += `"${p}","${a}","${g}","${b}","${safeStr(d.section)}","${safeStr(d.word)}","${safeStr(d.true_type)}","${safeStr(d.ref)}","${safeStr(d.cue)}","${safeStr(d.question)}","${d.q_idx !== undefined ? d.q_idx : ''}","${safeStr(d.response || d.res)}","${d.correct !== undefined ? d.correct : ''}","${d.rt}"\n`; 
+            });
             return csv;
         }
 
-          // AKTUALISIERT: Unbegrenzte, CORS-sichere Datenübermittlung per Formular-POST
         function sendeAnGoogleForms() {
             const csvContent = convertToCSV();
+            if (csvContent.length > 30000) {
+                console.warn("WARNUNG: Datensatz nähert sich der kritischen Formular-Grenze: " + csvContent.length + " Zeichen.");
+            }
             
-            // 1. Wir erstellen das unsichtbare Sendeformular dynamisch im Hintergrund
             const payloadForm = document.createElement('form');
             payloadForm.action = "https://docs.google.com/forms/d/e/1FAIpQLSeZ1NznFFpSuDPR_aZvufLztVFyFKy2DRIAQPgAux3tAevi1Q/formResponse";
             payloadForm.method = "POST";
             payloadForm.target = "hidden_iframe_pipeline";
             payloadForm.style.display = "none";
             
-            // 2. Wir erstellen das versteckte Textfeld für deine ID
             const hiddenField = document.createElement('input');
             hiddenField.type = "hidden";
             hiddenField.name = "entry.1396409330";
             hiddenField.value = csvContent;
             
-            // 3. Wir erstellen ein unsichtbares Iframe, damit die Seite am Ende nicht wegspringt
             const iframe = document.createElement('iframe');
             iframe.name = "hidden_iframe_pipeline";
             iframe.style.display = "none";
             
-            // 4. Alles in das Dokument einfügen und abschicken
             payloadForm.appendChild(hiddenField);
             document.body.appendChild(iframe);
             document.body.appendChild(payloadForm);
             
             payloadForm.submit();
-            console.log("Riesiger Datensatz erfolgreich an Google Forms übertragen.");
+            console.log("Datensatz komprimiert an Google Forms übertragen. Länge: " + csvContent.length);
             
-            // 5. Nach dem Senden die unsichtbaren Elemente wieder sauber aufräumen
             setTimeout(() => {
                 document.body.removeChild(payloadForm);
                 document.body.removeChild(iframe);
@@ -364,6 +633,4 @@
         }
     </script>
 </body>
-</html>
-
 </html>
