@@ -375,7 +375,7 @@
             // 1. Willkommen
             routines.push(() => { 
                 currentRoutine = new ResponsiveScreen(
-                    "Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten.\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.\n\nEine Teilnahme ist freiwillig. Wenn Sie sich unwohl fühlen können Sie jederzeit ohne Angabe von Gründen das Fenster schließen.\nIhre Daten werden anonymisiert gespeichert und dienen nur Forschungszwecken.\n\nKontakt:\nDr. Sebastian Scholz\nsebastian0scholz@gmail.com", 
+                    "Willkommen zu diesem Experiment.\n\nSchön, dass Sie teilnehmen!\n\nUnter allen Teilnehmenden werden am Ende 5 x 10€ Gutscheine von Amazon verlost.Zur Teilnahme am Gewinnspiel schicken Sie bitte den Code am Ende an die dort genannte Mailadresse.\n\nDas Experiment besteht aus mehreren Teilen, die Ihnen jeweils erklärt werden. Insgesamt dauert das Experiment etwa 25 Minuten.\nBitte versuchen Sie die gesamte Zeit konzentriert zu arbeiten.\n\nEine Teilnahme ist freiwillig. Wenn Sie sich unwohl fühlen können Sie jederzeit ohne Angabe von Gründen das Fenster schließen.\nIhre Daten werden anonymisiert gespeichert und dienen nur Forschungszwecken.\n\nKontakt:\nDr. Sebastian Scholz\nsebastian0scholz@gmail.com", 
                     isMobile ? "[AUF DEN BILDSCHIRM TIPPEN]" : "[LEERTASTE DRÜCKEN]", 
                     [' '], nextRoutine
                 ); 
@@ -586,7 +586,7 @@
                         
                         ctx.font = "bold " + (endSize + 4) + "px Arial"; 
                         ctx.textAlign = "center";
-                        ctx.fillText("Vielen Dank für Ihre Teilnahme!", canvas.width / 2, canvas.height * 0.12);
+                        ctx.fillText("Vielen Dank für Ihre Teilnahme! Für das Gewinnspiel schicken Sie bitte den Code per Mail an die untenstehende Mailadresse. Ihre Antworten können nicht zurückverfolgt werden.", canvas.width / 2, canvas.height * 0.12);
                         
                         ctx.font = endSize + "px Arial";
                         let debriefText = "In diesem Experiment soll der Einfluss des Selbstwerts auf das Erinnern und absichtliche Vergessen von Personenbeschreibungen untersucht werden. Die Hauptfrage ist, ob negative selbstwertbezogene Informationen einfacher vergessen werden können als andere Informationen. Ihre Daten wurden im Hintergrund gespeichert! Sie können das Fenster nun schließen.\n\nKontakt:\nDr. Sebastian Scholz\nsebastian0scholz@gmail.com";
@@ -598,7 +598,7 @@
                         
                         ctx.fillStyle = "#8B0000"; 
                         ctx.font = "bold " + (endSize + 4) + "px Arial";
-                        ctx.fillText("XXXX-XXXX-XXXX", canvas.width / 2, canvas.height * 0.86); 
+                        ctx.fillText("LHT2-QTEH-4XQP-48K6", canvas.width / 2, canvas.height * 0.86); 
                     }, 
                     handleKey: () => {} 
                 }; 
