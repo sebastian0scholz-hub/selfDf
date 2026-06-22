@@ -557,7 +557,7 @@
                 routines.push(() => { 
                     currentRoutine = new ResponsiveScreen(
                         q, 
-                        "Bitte nutzen Sie die Knöpfe zum Antworten.", 
+                        "Bitte nutzen Sie die Knöpfe zum Antworten. (oder: F = Nein, J = JA)", 
                         ['f', 'j'], 
                         (key, rt) => { 
                             compiledData.push({ section: 'post', q_idx: idx, response: key === 'f' ? 'Nein' : 'Ja', rt: rt }); 
